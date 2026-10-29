@@ -1,0 +1,48 @@
+# General Python
+__pycache__/
+*.py[cod]
+*.class
+# Distribution / packaging
+build/
+.dist/
+*.egg-info/
+# Installer logs
+pip-log.txt
+pip-delete-this-directory.txt
+# Virtual environment
+env/
+venv/
+ENV/
+env.bak/
+# Pytest cache
+.pytest_cache/
+# mypy
+.mypy_cache/
+# Coverage reports
+htmlcov/
+.coverage
+.coverage.*
+# Jupyter Notebook
+.ipynb_checkpoints
+# IDE / editor files
+.idea/
+.vscode/
+*.sublime-project
+*.sublime-workspace
+# OS files
+.DS_Store
+Thumbs.db
+# Environment files
+.env
+# Frontend (if using node)
+frontend/node_modules/
+frontend/dist/
+frontend/build/
+# Logs
+*.log
+# Secrets
+*.pem
+*.key
+# Misc
+*.bak
+*.tmp

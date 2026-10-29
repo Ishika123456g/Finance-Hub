@@ -1,0 +1,133 @@
+/* FinanceHub design system - tokens, resets, typography */
+
+:root {
+  --color-bg: #0b1020;
+  --color-bg-elevated: #10162c;
+  --color-surface: #141b34;
+  --color-surface-alt: #1a2242;
+  --color-border: rgba(148, 163, 209, 0.16);
+  --color-border-strong: rgba(148, 163, 209, 0.32);
+  --color-text: #eef1fb;
+  --color-text-muted: #9aa3c7;
+  --color-text-faint: #6b7399;
+  --color-primary: #6c8bff;
+  --color-primary-strong: #4a6bff;
+  --color-accent: #38d9c9;
+  --color-warning: #f5b942;
+  --color-danger: #ff6b6b;
+  --color-success: #46d19a;
+
+  --radius-sm: 8px;
+  --radius-md: 14px;
+  --radius-lg: 20px;
+  --radius-pill: 999px;
+
+  --shadow-card: 0 18px 40px -22px rgba(6, 10, 30, 0.65);
+  --shadow-elevated: 0 24px 60px -20px rgba(6, 10, 30, 0.75);
+
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 24px;
+  --space-6: 32px;
+  --space-7: 48px;
+  --space-8: 64px;
+
+  --font-body: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --font-display: "Manrope", var(--font-body);
+
+  --sidebar-width: 248px;
+  --header-height: 72px;
+}
+
+* ,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  color-scheme: dark;
+}
+
+body {
+  margin: 0;
+  font-family: var(--font-body);
+  background: var(--color-bg);
+  color: var(--color-text);
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3, h4 {
+  font-family: var(--font-display);
+  margin: 0 0 var(--space-2);
+  color: var(--color-text);
+  letter-spacing: -0.01em;
+}
+
+p {
+  margin: 0 0 var(--space-3);
+  color: var(--color-text-muted);
+}
+
+a {
+  color: var(--color-primary);
+  text-decoration: none;
+}
+
+ul, ol {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+button {
+  font-family: inherit;
+  cursor: pointer;
+}
+
+input, select, textarea {
+  font-family: inherit;
+  font-size: 0.95rem;
+}
+
+::selection {
+  background: rgba(108, 139, 255, 0.35);
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+.text-muted {
+  color: var(--color-text-muted);
+}
+
+.text-faint {
+  color: var(--color-text-faint);
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  padding: 3px 10px;
+  border-radius: var(--radius-pill);
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
+.badge-success { background: rgba(70, 209, 154, 0.14); color: var(--color-success); }
+.badge-warning { background: rgba(245, 185, 66, 0.14); color: var(--color-warning); }
+.badge-danger { background: rgba(255, 107, 107, 0.14); color: var(--color-danger); }
+.badge-neutral { background: rgba(148, 163, 209, 0.14); color: var(--color-text-muted); }
+.badge-info { background: rgba(108, 139, 255, 0.16); color: var(--color-primary); }

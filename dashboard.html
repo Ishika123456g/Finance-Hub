@@ -1,0 +1,1041 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>MCH Admin Panel · Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#f4f6f5;--surf:#fff;--ink:#16211f;--mute:#5d6b68;--line:#dde3e1;--brand:#0f6b5c;--brandsoft:#dff1ed;--warn:#a85d00;--warnsoft:#fdeccf;--bad:#b3261e;--badsoft:#fbe0dd;--ok:#1d7a3e;--oksoft:#ddf2e3;--info:#2455a4;--infosoft:#e1eaf9;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0e1514;--surf:#162120;--ink:#e6efed;--mute:#97a8a4;--line:#273533;--brand:#4cc2ac;--brandsoft:#1b3733;--warn:#f0b35a;--warnsoft:#3a2d14;--bad:#f28b82;--badsoft:#3d1f1d;--ok:#6fd48f;--oksoft:#1a3324;--info:#8ab4f8;--infosoft:#1c2a44}}
+:root[data-theme="dark"]{--bg:#0e1514;--surf:#162120;--ink:#e6efed;--mute:#97a8a4;--line:#273533;--brand:#4cc2ac;--brandsoft:#1b3733;--warn:#f0b35a;--warnsoft:#3a2d14;--bad:#f28b82;--badsoft:#3d1f1d;--ok:#6fd48f;--oksoft:#1a3324;--info:#8ab4f8;--infosoft:#1c2a44}
+*{box-sizing:border-box}html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.5 "IBM Plex Sans",system-ui,sans-serif}
+.app{display:grid;grid-template-columns:230px 1fr;min-height:100vh}
+nav{background:var(--surf);border-right:1px solid var(--line);padding:16px 10px;position:sticky;top:0;height:100vh;overflow:auto;display:flex;flex-direction:column}
+.brand{font-weight:600;font-size:16px;padding:4px 10px 14px}.brand small{display:block;color:var(--mute);font-weight:400;font-size:12px}
+nav button{display:block;width:100%;text-align:left;background:none;border:0;color:var(--ink);padding:8px 10px;border-radius:6px;font:inherit;cursor:pointer}
+nav button:hover{background:var(--bg)}nav button.on{background:var(--brandsoft);color:var(--brand);font-weight:600}
+nav button:focus-visible,.btn:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid var(--brand);outline-offset:1px}
+nav .grp{color:var(--mute);font-size:12px;padding:12px 10px 4px}
+main{padding:24px;min-width:0}
+h1{font-size:22px;margin:0 0 2px;font-weight:600}h2{font-size:15px;margin:0 0 10px;font-weight:600}
+.sub{color:var(--mute);margin:0 0 6px}.api{display:inline-block;font:12px ui-monospace,monospace;background:var(--infosoft);color:var(--info);padding:2px 8px;border-radius:4px;margin:0 6px 16px 0}
+.row{display:grid;gap:14px;margin-bottom:14px}.c4{grid-template-columns:repeat(4,1fr)}.c2{grid-template-columns:2fr 1fr}
+.card{background:var(--surf);border:1px solid var(--line);border-radius:8px;padding:16px;min-width:0}
+.kpi b{display:block;font-size:24px;font-weight:600;font-variant-numeric:tabular-nums}.kpi span{color:var(--mute);font-size:12px}
+.scroll{overflow-x:auto}table{border-collapse:collapse;width:100%;min-width:560px}
+th{text-align:left;color:var(--mute);font-weight:500;font-size:12px;padding:8px 10px;border-bottom:1px solid var(--line);white-space:nowrap}
+td{padding:9px 10px;border-bottom:1px solid var(--line);font-variant-numeric:tabular-nums;white-space:nowrap}
+tr.sel td{background:var(--brandsoft)}tr[data-i]{cursor:pointer}
+.tag{display:inline-block;padding:1px 8px;border-radius:99px;font-size:12px;font-weight:500}
+.ok{background:var(--oksoft);color:var(--ok)}.bad{background:var(--badsoft);color:var(--bad)}.warn{background:var(--warnsoft);color:var(--warn)}.info{background:var(--infosoft);color:var(--info)}.mut{background:var(--bg);color:var(--mute)}
+.bar{display:flex;gap:10px;margin-bottom:12px;flex-wrap:wrap;align-items:center}
+input,select{font:inherit;color:var(--ink);background:var(--surf);border:1px solid var(--line);border-radius:6px;padding:7px 10px}
+.btn{font:inherit;border:1px solid var(--line);background:var(--surf);color:var(--ink);padding:7px 12px;border-radius:6px;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:6px;transition:background 0.15s, border-color 0.15s}
+.btn:hover{background:var(--bg)}
+.btn.p{background:var(--brand);border-color:var(--brand);color:#fff}
+.btn.p:hover{opacity:0.92}
+.btn.d{color:var(--bad);border-color:var(--bad)}
+.btn.d:hover{background:var(--badsoft)}
+.btn.sm{padding:4px 8px;font-size:12px}
+:root[data-theme="dark"] .btn.p{color:#0e1514}@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .btn.p{color:#0e1514}}
+.tl{list-style:none;margin:0;padding:0}.tl li{padding:0 0 12px 18px;border-left:2px solid var(--line);position:relative;margin-left:6px}
+.tl li:before{content:"";position:absolute;left:-6px;top:4px;width:10px;height:10px;border-radius:50%;background:var(--brand)}
+.tl li.now:before{background:var(--warn)}.tl small{display:block;color:var(--mute)}
+.sla{font-size:26px;font-weight:600;color:var(--warn);font-variant-numeric:tabular-nums}
+.kv{display:grid;grid-template-columns:110px 1fr;gap:6px 10px;margin:0 0 12px}.kv dt{color:var(--mute)}.kv dd{margin:0}
+.chart{display:flex;align-items:flex-end;gap:8px;height:120px}.chart i{flex:1;background:var(--brand);border-radius:3px 3px 0 0;opacity:.85}
+.note{color:var(--mute);font-size:12px;margin-top:8px}
+
+/* Modal styles */
+.modal-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.55);display:flex;align-items:center;justify-content:center;z-index:9999;backdrop-filter:blur(3px);padding:16px}
+.modal-card{background:var(--surf);border:1px solid var(--line);border-radius:10px;width:100%;max-width:500px;box-shadow:0 12px 32px rgba(0,0,0,0.28);overflow:hidden;animation:modalZoom .15s ease-out}
+@keyframes modalZoom{from{opacity:0;transform:scale(.95)}to{opacity:1;transform:scale(1)}}
+.modal-header{display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid var(--line);font-size:16px;font-weight:600}
+.modal-body{padding:20px;display:flex;flex-direction:column;gap:14px;max-height:75vh;overflow-y:auto}
+.modal-footer{padding:14px 20px;border-top:1px solid var(--line);display:flex;justify-content:flex-end;gap:10px;background:var(--bg)}
+.fg{display:flex;flex-direction:column;gap:5px}
+.fg label{font-size:12px;font-weight:500;color:var(--mute)}
+.fg-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+
+/* Toast */
+.toast-msg{position:fixed;bottom:24px;right:24px;background:var(--surf);color:var(--ink);border:1px solid var(--line);padding:12px 18px;border-radius:8px;box-shadow:0 8px 24px rgba(0,0,0,0.18);display:flex;align-items:center;gap:10px;z-index:10000;font-size:13px;animation:modalZoom .2s ease-out}
+.toast-msg.ok{border-color:var(--ok);background:var(--oksoft);color:var(--ok)}
+.toast-msg.bad{border-color:var(--bad);background:var(--badsoft);color:var(--bad)}
+
+@media (max-width:860px){.app{grid-template-columns:1fr}nav{position:static;height:auto;display:flex;gap:4px;overflow-x:auto;border-right:0;border-bottom:1px solid var(--line);padding:8px}nav .brand,nav .grp{display:none}nav button{white-space:nowrap;width:auto}.c4{grid-template-columns:1fr 1fr}.c2{grid-template-columns:1fr}main{padding:16px}}
+</style>
+</head>
+<body>
+<div class="app">
+<nav id="nav" aria-label="Admin sections">
+  <div class="brand">MCH Admin<small>Platform Console</small></div>
+  <button data-k="overview" class="">Overview</button>
+  <button data-k="customers" class="">Customers</button>
+  <button data-k="consents" class="">Consent register</button>
+  <button data-k="connections" class="on" aria-current="page">Institutions</button>
+  <button data-k="transactions" class="">Transactions</button>
+  <button data-k="disputes" class="">Disputes</button>
+  <button data-k="alerts" class="">Alerts and notifications</button>
+  <button data-k="staff" class="">Staff and roles</button>
+  <button data-k="audit" class="">Audit log</button>
+</nav>
+<main id="main">
+  <!-- Content dynamically loaded -->
+</main>
+</div>
+
+<div id="modalContainer"></div>
+<div id="toastContainer"></div>
+
+<script>
+var DEFAULT_PAGE = 'overview';
+var T=function(c,t){return '<span class="tag '+c+'">'+t+'</span>'};
+var S={Active:'ok',Linked:'ok',Open:'warn',Pending:'warn','Awaiting bank':'warn','Under review':'info',Resolved:'ok',Closed:'mut',Expiring:'warn',Withdrawn:'mut',Healthy:'ok',Degraded:'warn',Maintenance:'bad',Suspended:'bad',Sent:'ok',Failed:'bad',Verified:'ok',Unverified:'warn'};
+function tg(s){return T(S[s]||'mut',s)}
+function tbl(cols,rows,sel){return '<div class="scroll"><table><thead><tr>'+cols.map(function(c){return '<th>'+c+'</th>'}).join('')+'</tr></thead><tbody>'+rows.map(function(r,i){return '<tr'+(sel!=null?' data-i="'+i+'"':'')+(sel===i?' class="sel"':'')+'>'+r.map(function(x){return '<td>'+x+'</td>'}).join('')+'</tr>'}).join('')+'</tbody></table></div>'}
+function kpi(v,l,id){return '<div class="card kpi"><b'+(id?' id="'+id+'"':'')+'>'+v+'</b><span>'+l+'</span></div>'}
+function head(t,s,apis){return '<h1>'+t+'</h1><p class="sub">'+s+'</p>'+apis.map(function(a){return '<span class="api">'+a+'</span>'}).join('')}
+function bar(f){return '<div class="bar">'+f+'</div>'}
+var srch='<input type="search" placeholder="Search" aria-label="Search">';
+
+var D=[["MCH-240725-018","Adewale Afolabi","Failed transfer","₦45,000","GTBank","Awaiting bank","18h 24m"],["MCH-240722-007","Ngozi Eze","Card payment","₦12,900","Access Bank","Under review","2d 03h"],["MCH-240721-004","Tunde Bakare","Duplicate debit","₦8,200","UBA","Open","3d 11h"],["MCH-240718-002","Amaka Obi","Failed transfer","₦150,000","FirstBank","Resolved","–"]];
+var sel=0;
+
+// Dynamic Institutions State & Controller
+var InstitutionsApp = {
+  data: [],
+  isLoading: false,
+
+  toast: function(msg, isOk) {
+    var c = document.getElementById('toastContainer');
+    if (!c) return;
+    var el = document.createElement('div');
+    el.className = 'toast-msg ' + (isOk ? 'ok' : 'bad');
+    el.innerHTML = (isOk ? '✓ ' : '⚠ ') + msg;
+    c.appendChild(el);
+    setTimeout(function() {
+      if (el.parentNode) el.parentNode.removeChild(el);
+    }, 3800);
+  },
+
+  getAuthHeader: function() {
+    var token = localStorage.getItem('mch_admin_token');
+    return token ? { 'Authorization': 'Bearer ' + token } : {};
+  },
+
+  init: function() {
+    var sInput = document.getElementById('instSearchInput');
+    var sFilter = document.getElementById('instStatusFilter');
+    var bAdd = document.getElementById('btnOpenAddModal');
+    var bRef = document.getElementById('btnRefreshInst');
+
+    if (sInput) {
+      var timer = null;
+      sInput.addEventListener('input', function() {
+        clearTimeout(timer);
+        timer = setTimeout(function() { InstitutionsApp.loadList(); }, 250);
+      });
+    }
+    if (sFilter) {
+      sFilter.addEventListener('change', function() {
+        InstitutionsApp.loadList();
+      });
+    }
+    if (bAdd) {
+      bAdd.addEventListener('click', function() {
+        InstitutionsApp.openAddModal();
+      });
+    }
+    if (bRef) {
+      bRef.addEventListener('click', function() {
+        InstitutionsApp.loadStats();
+        InstitutionsApp.loadList();
+      });
+    }
+
+    this.loadStats();
+    this.loadList();
+  },
+
+  loadStats: function() {
+    fetch('/api/admin/institutions/stats', {
+      headers: Object.assign({ 'Content-Type': 'application/json' }, InstitutionsApp.getAuthHeader())
+    })
+    .then(function(res) { return res.json(); })
+    .then(function(stats) {
+      var kpiAvg = document.getElementById('kpiAvgSuccess');
+      var kpiLive = document.getElementById('kpiLiveCount');
+      var kpiMaint = document.getElementById('kpiMaintCount');
+      var kpiTotal = document.getElementById('kpiTotalAccounts');
+
+      if (kpiAvg) kpiAvg.textContent = (stats.avg_success_rate != null ? stats.avg_success_rate + '%' : '–');
+      if (kpiLive) kpiLive.textContent = stats.live_count != null ? stats.live_count : '–';
+      if (kpiMaint) kpiMaint.textContent = stats.maintenance_count != null ? stats.maintenance_count : '–';
+      if (kpiTotal) kpiTotal.textContent = stats.total_linked_accounts != null ? Number(stats.total_linked_accounts).toLocaleString() : '–';
+    })
+    .catch(function(err) {
+      console.warn('Could not load stats from DB', err);
+    });
+  },
+
+  loadList: function() {
+    var container = document.getElementById('instTableContainer');
+    if (!container) return;
+
+    var sInput = document.getElementById('instSearchInput');
+    var sFilter = document.getElementById('instStatusFilter');
+    var search = sInput ? sInput.value.trim() : '';
+    var status = sFilter ? sFilter.value.trim() : '';
+
+    var params = new URLSearchParams();
+    if (search) params.append('search', search);
+    if (status) params.append('status', status);
+
+    var url = '/api/admin/institutions' + (params.toString() ? '?' + params.toString() : '');
+
+    container.innerHTML = '<div style="padding:28px;text-align:center;color:var(--mute);">Querying PostgreSQL database...</div>';
+
+    fetch(url, {
+      headers: Object.assign({ 'Content-Type': 'application/json' }, InstitutionsApp.getAuthHeader())
+    })
+    .then(function(res) {
+      if (!res.ok) throw new Error('Database request failed with HTTP ' + res.status);
+      return res.json();
+    })
+    .then(function(list) {
+      InstitutionsApp.data = list;
+      if (!list || list.length === 0) {
+        container.innerHTML = '<div style="padding:32px;text-align:center;">' +
+          '<div style="font-weight:600;font-size:16px;margin-bottom:6px;">No institutions found</div>' +
+          '<div style="color:var(--mute);margin-bottom:16px;">Try adjusting your search criteria or add a new institution.</div>' +
+          '<button class="btn p" onclick="InstitutionsApp.openAddModal()">+ Add Institution</button>' +
+        '</div>';
+        return;
+      }
+
+      var html = '<div class="scroll"><table><thead><tr>' +
+        '<th>Institution</th>' +
+        '<th>Provider</th>' +
+        '<th>Linked accounts</th>' +
+        '<th>Last sync</th>' +
+        '<th>Success (24h)</th>' +
+        '<th>Customer-facing status</th>' +
+        '<th style="text-align:right;">Actions</th>' +
+        '</tr></thead><tbody>';
+
+      list.forEach(function(inst) {
+        var isMaint = (inst.status || '').toLowerCase() === 'maintenance';
+        var isHealthy = (inst.status || '').toLowerCase() === 'healthy';
+
+        var toggleBtn = isMaint
+          ? '<button class="btn p sm" onclick="InstitutionsApp.toggleStatus(' + inst.id + ', \'Healthy\')">Set live</button>'
+          : '<button class="btn sm" onclick="InstitutionsApp.toggleStatus(' + inst.id + ', \'Maintenance\')">Set maint</button>';
+
+        var nameDisplay = '<b>' + escapeHtml(inst.name) + '</b>' +
+          (inst.code ? ' <small style="color:var(--mute);font-weight:500;margin-left:4px;">(' + escapeHtml(inst.code) + ')</small>' : '');
+
+        var successDisplay = (inst.success_rate_24h != null ? inst.success_rate_24h + '%' : '–');
+        if (inst.success_rate_24h >= 98) successDisplay = '<span style="color:var(--ok);font-weight:600;">' + successDisplay + '</span>';
+        else if (inst.success_rate_24h >= 90) successDisplay = '<span style="color:var(--warn);font-weight:600;">' + successDisplay + '</span>';
+        else successDisplay = '<span style="color:var(--bad);font-weight:600;">' + successDisplay + '</span>';
+
+        html += '<tr>' +
+          '<td>' + nameDisplay + '</td>' +
+          '<td>' + escapeHtml(inst.provider || 'Aggregator A') + '</td>' +
+          '<td>' + Number(inst.linked_accounts || 0).toLocaleString() + '</td>' +
+          '<td>' + escapeHtml(inst.last_sync || 'Just now') + '</td>' +
+          '<td>' + successDisplay + '</td>' +
+          '<td>' + tg(inst.status || 'Healthy') + '</td>' +
+          '<td style="text-align:right;white-space:nowrap;display:flex;justify-content:flex-end;gap:6px;">' +
+            '<button class="btn sm" onclick="InstitutionsApp.openEditModal(' + inst.id + ')">Edit</button>' +
+            toggleBtn +
+            '<button class="btn d sm" onclick="InstitutionsApp.openDeleteModal(' + inst.id + ', \'' + escapeHtml(inst.name).replace(/'/g, "\\'") + '\')">Delete</button>' +
+          '</td>' +
+        '</tr>';
+      });
+
+      html += '</tbody></table></div>';
+      container.innerHTML = html;
+    })
+    .catch(function(err) {
+      container.innerHTML = '<div style="padding:28px;text-align:center;color:var(--bad);">' +
+        'Failed to query PostgreSQL: ' + escapeHtml(err.message) +
+        '<div style="margin-top:12px;"><button class="btn" onclick="InstitutionsApp.loadList()">Retry</button></div>' +
+      '</div>';
+    });
+  },
+
+  openAddModal: function() {
+    var c = document.getElementById('modalContainer');
+    c.innerHTML = '<div class="modal-overlay" id="instModal" onclick="if(event.target===this)InstitutionsApp.closeModal()">' +
+      '<div class="modal-card">' +
+        '<div class="modal-header">' +
+          '<span>Add New Financial Institution</span>' +
+          '<button class="btn sm" onclick="InstitutionsApp.closeModal()">✕</button>' +
+        '</div>' +
+        '<form id="addInstForm" onsubmit="event.preventDefault(); InstitutionsApp.submitAdd();">' +
+          '<div class="modal-body">' +
+            '<div class="fg">' +
+              '<label for="add_name">Institution Name *</label>' +
+              '<input id="add_name" placeholder="e.g. Kuda Bank, Moniepoint, Fidelity" required>' +
+            '</div>' +
+            '<div class="fg-grid">' +
+              '<div class="fg">' +
+                '<label for="add_code">Short Code / Ticker</label>' +
+                '<input id="add_code" placeholder="e.g. KUDA, FID">' +
+              '</div>' +
+              '<div class="fg">' +
+                '<label for="add_provider">Aggregator Provider</label>' +
+                '<input id="add_provider" value="Aggregator A" required>' +
+              '</div>' +
+            '</div>' +
+            '<div class="fg-grid">' +
+              '<div class="fg">' +
+                '<label for="add_status">Customer Status</label>' +
+                '<select id="add_status">' +
+                  '<option value="Healthy">Healthy</option>' +
+                  '<option value="Degraded">Degraded</option>' +
+                  '<option value="Maintenance">Maintenance</option>' +
+                  '<option value="Suspended">Suspended</option>' +
+                '</select>' +
+              '</div>' +
+              '<div class="fg">' +
+                '<label for="add_accounts">Linked Accounts</label>' +
+                '<input type="number" id="add_accounts" value="0" min="0">' +
+              '</div>' +
+            '</div>' +
+            '<div class="fg-grid">' +
+              '<div class="fg">' +
+                '<label for="add_success">Success Rate 24h (%)</label>' +
+                '<input type="number" step="0.1" id="add_success" value="99.5" min="0" max="100">' +
+              '</div>' +
+              '<div class="fg">' +
+                '<label for="add_sync">Last Sync Note</label>' +
+                '<input id="add_sync" value="Just now">' +
+              '</div>' +
+            '</div>' +
+          '</div>' +
+          '<div class="modal-footer">' +
+            '<button type="button" class="btn" onclick="InstitutionsApp.closeModal()">Cancel</button>' +
+            '<button type="submit" class="btn p" id="btnSubmitAdd">Save Institution</button>' +
+          '</div>' +
+        '</form>' +
+      '</div>' +
+    '</div>';
+    document.getElementById('add_name').focus();
+  },
+
+  submitAdd: function() {
+    var btn = document.getElementById('btnSubmitAdd');
+    if (btn) btn.disabled = true;
+
+    var payload = {
+      name: document.getElementById('add_name').value.trim(),
+      code: document.getElementById('add_code').value.trim() || null,
+      provider: document.getElementById('add_provider').value.trim() || 'Aggregator A',
+      status: document.getElementById('add_status').value,
+      linked_accounts: parseInt(document.getElementById('add_accounts').value || '0', 10),
+      success_rate_24h: parseFloat(document.getElementById('add_success').value || '99.0'),
+      last_sync: document.getElementById('add_sync').value.trim() || 'Just now',
+      is_active: document.getElementById('add_status').value.toLowerCase() !== 'maintenance'
+    };
+
+    fetch('/api/admin/institutions', {
+      method: 'POST',
+      headers: Object.assign({ 'Content-Type': 'application/json' }, InstitutionsApp.getAuthHeader()),
+      body: JSON.stringify(payload)
+    })
+    .then(function(res) {
+      if (!res.ok) {
+        return res.json().then(function(err) { throw new Error(err.detail || 'Creation failed'); });
+      }
+      return res.json();
+    })
+    .then(function(created) {
+      InstitutionsApp.closeModal();
+      InstitutionsApp.toast('Institution "' + created.name + '" saved to PostgreSQL!', true);
+      InstitutionsApp.loadStats();
+      InstitutionsApp.loadList();
+    })
+    .catch(function(err) {
+      if (btn) btn.disabled = false;
+      alert('Error saving institution: ' + err.message);
+    });
+  },
+
+  openEditModal: function(id) {
+    var inst = InstitutionsApp.data.find(function(x) { return x.id === id; });
+    if (!inst) {
+      alert('Institution not found in memory');
+      return;
+    }
+
+    var c = document.getElementById('modalContainer');
+    c.innerHTML = '<div class="modal-overlay" id="instModal" onclick="if(event.target===this)InstitutionsApp.closeModal()">' +
+      '<div class="modal-card">' +
+        '<div class="modal-header">' +
+          '<span>Edit Institution: ' + escapeHtml(inst.name) + '</span>' +
+          '<button class="btn sm" onclick="InstitutionsApp.closeModal()">✕</button>' +
+        '</div>' +
+        '<form id="editInstForm" onsubmit="event.preventDefault(); InstitutionsApp.submitEdit(' + id + ');">' +
+          '<div class="modal-body">' +
+            '<div class="fg">' +
+              '<label for="edit_name">Institution Name *</label>' +
+              '<input id="edit_name" value="' + escapeHtml(inst.name) + '" required>' +
+            '</div>' +
+            '<div class="fg-grid">' +
+              '<div class="fg">' +
+                '<label for="edit_code">Short Code / Ticker</label>' +
+                '<input id="edit_code" value="' + escapeHtml(inst.code || '') + '">' +
+              '</div>' +
+              '<div class="fg">' +
+                '<label for="edit_provider">Aggregator Provider</label>' +
+                '<input id="edit_provider" value="' + escapeHtml(inst.provider || '') + '" required>' +
+              '</div>' +
+            '</div>' +
+            '<div class="fg-grid">' +
+              '<div class="fg">' +
+                '<label for="edit_status">Customer Status</label>' +
+                '<select id="edit_status">' +
+                  '<option value="Healthy"' + (inst.status==='Healthy'?' selected':'') + '>Healthy</option>' +
+                  '<option value="Degraded"' + (inst.status==='Degraded'?' selected':'') + '>Degraded</option>' +
+                  '<option value="Maintenance"' + (inst.status==='Maintenance'?' selected':'') + '>Maintenance</option>' +
+                  '<option value="Suspended"' + (inst.status==='Suspended'?' selected':'') + '>Suspended</option>' +
+                '</select>' +
+              '</div>' +
+              '<div class="fg">' +
+                '<label for="edit_accounts">Linked Accounts</label>' +
+                '<input type="number" id="edit_accounts" value="' + (inst.linked_accounts || 0) + '" min="0">' +
+              '</div>' +
+            '</div>' +
+            '<div class="fg-grid">' +
+              '<div class="fg">' +
+                '<label for="edit_success">Success Rate 24h (%)</label>' +
+                '<input type="number" step="0.1" id="edit_success" value="' + (inst.success_rate_24h != null ? inst.success_rate_24h : 99.0) + '" min="0" max="100">' +
+              '</div>' +
+              '<div class="fg">' +
+                '<label for="edit_sync">Last Sync Note</label>' +
+                '<input id="edit_sync" value="' + escapeHtml(inst.last_sync || '') + '">' +
+              '</div>' +
+            '</div>' +
+          '</div>' +
+          '<div class="modal-footer">' +
+            '<button type="button" class="btn" onclick="InstitutionsApp.closeModal()">Cancel</button>' +
+            '<button type="submit" class="btn p" id="btnSubmitEdit">Update Institution</button>' +
+          '</div>' +
+        '</form>' +
+      '</div>' +
+    '</div>';
+  },
+
+  submitEdit: function(id) {
+    var btn = document.getElementById('btnSubmitEdit');
+    if (btn) btn.disabled = true;
+
+    var payload = {
+      name: document.getElementById('edit_name').value.trim(),
+      code: document.getElementById('edit_code').value.trim() || null,
+      provider: document.getElementById('edit_provider').value.trim(),
+      status: document.getElementById('edit_status').value,
+      linked_accounts: parseInt(document.getElementById('edit_accounts').value || '0', 10),
+      success_rate_24h: parseFloat(document.getElementById('edit_success').value || '0'),
+      last_sync: document.getElementById('edit_sync').value.trim(),
+      is_active: document.getElementById('edit_status').value.toLowerCase() !== 'maintenance'
+    };
+
+    fetch('/api/admin/institutions/' + id, {
+      method: 'PUT',
+      headers: Object.assign({ 'Content-Type': 'application/json' }, InstitutionsApp.getAuthHeader()),
+      body: JSON.stringify(payload)
+    })
+    .then(function(res) {
+      if (!res.ok) {
+        return res.json().then(function(err) { throw new Error(err.detail || 'Update failed'); });
+      }
+      return res.json();
+    })
+    .then(function(updated) {
+      InstitutionsApp.closeModal();
+      InstitutionsApp.toast('Institution "' + updated.name + '" updated in PostgreSQL!', true);
+      InstitutionsApp.loadStats();
+      InstitutionsApp.loadList();
+    })
+    .catch(function(err) {
+      if (btn) btn.disabled = false;
+      alert('Error updating institution: ' + err.message);
+    });
+  },
+
+  toggleStatus: function(id, newStatus) {
+    var payload = {
+      status: newStatus,
+      is_active: newStatus.toLowerCase() !== 'maintenance'
+    };
+    if (newStatus === 'Maintenance') {
+      payload.success_rate_24h = 0.0;
+    } else if (newStatus === 'Healthy') {
+      payload.success_rate_24h = 99.5;
+      payload.last_sync = 'Just now';
+    }
+
+    fetch('/api/admin/institutions/' + id, {
+      method: 'PATCH',
+      headers: Object.assign({ 'Content-Type': 'application/json' }, InstitutionsApp.getAuthHeader()),
+      body: JSON.stringify(payload)
+    })
+    .then(function(res) {
+      if (!res.ok) throw new Error('Status update failed');
+      return res.json();
+    })
+    .then(function(updated) {
+      InstitutionsApp.toast('Status set to ' + updated.status + ' for ' + updated.name, true);
+      InstitutionsApp.loadStats();
+      InstitutionsApp.loadList();
+    })
+    .catch(function(err) {
+      InstitutionsApp.toast(err.message, false);
+    });
+  },
+
+  openDeleteModal: function(id, name) {
+    var c = document.getElementById('modalContainer');
+    c.innerHTML = '<div class="modal-overlay" id="instModal" onclick="if(event.target===this)InstitutionsApp.closeModal()">' +
+      '<div class="modal-card">' +
+        '<div class="modal-header">' +
+          '<span style="color:var(--bad);">Delete Institution</span>' +
+          '<button class="btn sm" onclick="InstitutionsApp.closeModal()">✕</button>' +
+        '</div>' +
+        '<div class="modal-body">' +
+          '<p style="margin:0;font-size:14px;line-height:1.6;">Are you sure you want to permanently delete <b>' + escapeHtml(name) + '</b> from PostgreSQL?</p>' +
+          '<p class="note" style="color:var(--bad);margin:0;">This operation immediately purges this connector and its configuration from the database.</p>' +
+        '</div>' +
+        '<div class="modal-footer">' +
+          '<button type="button" class="btn" onclick="InstitutionsApp.closeModal()">Cancel</button>' +
+          '<button type="button" class="btn d" id="btnConfirmDelete" onclick="InstitutionsApp.submitDelete(' + id + ')">Yes, Delete Institution</button>' +
+        '</div>' +
+      '</div>' +
+    '</div>';
+  },
+
+  submitDelete: function(id) {
+    var btn = document.getElementById('btnConfirmDelete');
+    if (btn) btn.disabled = true;
+
+    fetch('/api/admin/institutions/' + id, {
+      method: 'DELETE',
+      headers: Object.assign({ 'Content-Type': 'application/json' }, InstitutionsApp.getAuthHeader())
+    })
+    .then(function(res) {
+      if (!res.ok) throw new Error('Delete operation failed');
+      return res.json();
+    })
+    .then(function(data) {
+      InstitutionsApp.closeModal();
+      InstitutionsApp.toast(data.message || 'Deleted successfully', true);
+      InstitutionsApp.loadStats();
+      InstitutionsApp.loadList();
+    })
+    .catch(function(err) {
+      if (btn) btn.disabled = false;
+      alert('Error deleting: ' + err.message);
+    });
+  },
+
+  closeModal: function() {
+    var c = document.getElementById('modalContainer');
+    if (c) c.innerHTML = '';
+  }
+};
+
+function escapeHtml(str) {
+  if (!str) return '';
+  return String(str).replace(/[&<>"']/g, function(m) {
+    return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m];
+  });
+}
+
+// Dynamic Customers State & Controller (PostgreSQL)
+var CustomersApp = {
+  data: [],
+  isLoading: false,
+
+  toast: function(msg, isOk) {
+    var c = document.getElementById('toastContainer');
+    if (!c) return;
+    var el = document.createElement('div');
+    el.className = 'toast-msg ' + (isOk ? 'ok' : 'bad');
+    el.innerHTML = (isOk ? '✓ ' : '⚠ ') + msg;
+    c.appendChild(el);
+    setTimeout(function() {
+      if (el.parentNode) el.parentNode.removeChild(el);
+    }, 3800);
+  },
+
+  getAuthHeader: function() {
+    var token = localStorage.getItem('mch_admin_token');
+    return token ? { 'Authorization': 'Bearer ' + token } : {};
+  },
+
+  init: function() {
+    var sInput = document.getElementById('custSearchInput');
+    var sFilter = document.getElementById('custStatusFilter');
+    var bRef = document.getElementById('btnRefreshCust');
+    var bExport = document.getElementById('btnExportCustCsv');
+
+    if (sInput) {
+      var timer = null;
+      sInput.addEventListener('input', function() {
+        clearTimeout(timer);
+        timer = setTimeout(function() { CustomersApp.loadList(); }, 250);
+      });
+    }
+    if (sFilter) {
+      sFilter.addEventListener('change', function() {
+        CustomersApp.loadList();
+      });
+    }
+    if (bRef) {
+      bRef.addEventListener('click', function() {
+        CustomersApp.loadList();
+        CustomersApp.loadStats();
+      });
+    }
+    if (bExport) {
+      bExport.addEventListener('click', function() {
+        CustomersApp.exportCSV();
+      });
+    }
+
+    this.loadStats();
+    this.loadList();
+  },
+
+  loadStats: function() {
+    fetch('/api/admin/customers/stats', {
+      headers: Object.assign({ 'Content-Type': 'application/json' }, CustomersApp.getAuthHeader())
+    })
+    .then(function(res) { return res.json(); })
+    .then(function(stats) {
+      var kpiCust = document.getElementById('kpiOverviewCustCount');
+      if (kpiCust && stats.total_customers != null) {
+        kpiCust.textContent = Number(stats.total_customers).toLocaleString();
+      }
+      var kpiTotal = document.getElementById('kpiCustTotal');
+      var kpiActive = document.getElementById('kpiCustActive');
+      var kpiSusp = document.getElementById('kpiCustSuspended');
+      var kpiUnver = document.getElementById('kpiCustUnverified');
+
+      if (kpiTotal) kpiTotal.textContent = Number(stats.total_customers || 0).toLocaleString();
+      if (kpiActive) kpiActive.textContent = Number(stats.active_customers || 0).toLocaleString();
+      if (kpiSusp) kpiSusp.textContent = Number(stats.suspended_customers || 0).toLocaleString();
+      if (kpiUnver) kpiUnver.textContent = Number(stats.unverified_customers || 0).toLocaleString();
+    })
+    .catch(function(err) {
+      console.warn('Could not load customer stats from DB', err);
+    });
+  },
+
+  loadList: function() {
+    var container = document.getElementById('custTableContainer');
+    if (!container) return;
+
+    var sInput = document.getElementById('custSearchInput');
+    var sFilter = document.getElementById('custStatusFilter');
+    var search = sInput ? sInput.value.trim() : '';
+    var status = sFilter ? sFilter.value.trim() : '';
+
+    var params = new URLSearchParams();
+    if (search) params.append('search', search);
+    if (status) params.append('status', status);
+
+    var url = '/api/admin/customers' + (params.toString() ? '?' + params.toString() : '');
+
+    container.innerHTML = '<div style="padding:28px;text-align:center;color:var(--mute);">Querying PostgreSQL database...</div>';
+
+    fetch(url, {
+      headers: Object.assign({ 'Content-Type': 'application/json' }, CustomersApp.getAuthHeader())
+    })
+    .then(function(res) {
+      if (!res.ok) throw new Error('Database request failed with HTTP ' + res.status);
+      return res.json();
+    })
+    .then(function(list) {
+      CustomersApp.data = list;
+      if (!list || list.length === 0) {
+        container.innerHTML = '<div style="padding:32px;text-align:center;">' +
+          '<div style="font-weight:600;font-size:16px;margin-bottom:6px;">No customers found</div>' +
+          '<div style="color:var(--mute);margin-bottom:16px;">Try adjusting your search criteria or register a new customer.</div>' +
+        '</div>';
+        return;
+      }
+
+      var html = '<div class="scroll"><table><thead><tr>' +
+        '<th>Customer</th>' +
+        '<th>Mobile</th>' +
+        '<th>Email</th>' +
+        '<th>Role</th>' +
+        '<th>Verified</th>' +
+        '<th>MFA</th>' +
+        '<th>Joined</th>' +
+        '<th>Status</th>' +
+        '<th style="text-align:right;">Actions</th>' +
+        '</tr></thead><tbody>';
+
+      list.forEach(function(cust) {
+        var joinedDate = '–';
+        if (cust.created_at) {
+          try {
+            var d = new Date(cust.created_at);
+            joinedDate = d.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+          } catch(e) {
+            joinedDate = String(cust.created_at).slice(0, 10);
+          }
+        }
+
+        var isSuspended = !cust.is_active;
+        var toggleBtn = isSuspended
+          ? '<button class="btn sm p" onclick="CustomersApp.toggleSuspend(' + cust.id + ', \'activate\')">Activate</button>'
+          : '<button class="btn sm d" onclick="CustomersApp.toggleSuspend(' + cust.id + ', \'suspend\')">Suspend</button>';
+
+        var nameDisplay = '<b>' + escapeHtml(cust.full_name || 'Customer') + '</b>';
+        var phoneDisplay = cust.phone_number ? escapeHtml(cust.phone_number) : '<span style="color:var(--mute);">–</span>';
+        var verifiedBadge = cust.is_verified ? tg('Verified') : tg('Unverified');
+        var statusBadge = tg(cust.status || (cust.is_active ? 'Active' : 'Suspended'));
+
+        html += '<tr>' +
+          '<td>' + nameDisplay + '</td>' +
+          '<td>' + phoneDisplay + '</td>' +
+          '<td>' + escapeHtml(cust.email) + '</td>' +
+          '<td>' + escapeHtml(cust.role || 'User') + '</td>' +
+          '<td>' + verifiedBadge + '</td>' +
+          '<td>' + escapeHtml(cust.mfa_type || 'SMS') + '</td>' +
+          '<td>' + joinedDate + '</td>' +
+          '<td>' + statusBadge + '</td>' +
+          '<td style="text-align:right;white-space:nowrap;display:flex;justify-content:flex-end;gap:6px;">' +
+            '<button class="btn sm" onclick="CustomersApp.openEditModal(' + cust.id + ')">Edit</button>' +
+            toggleBtn +
+          '</td>' +
+        '</tr>';
+      });
+
+      html += '</tbody></table></div>';
+      container.innerHTML = html;
+    })
+    .catch(function(err) {
+      container.innerHTML = '<div style="padding:28px;text-align:center;color:var(--bad);">' +
+        'Failed to query customers from PostgreSQL: ' + escapeHtml(err.message) +
+        '<div style="margin-top:12px;"><button class="btn" onclick="CustomersApp.loadList()">Retry</button></div>' +
+      '</div>';
+    });
+  },
+
+  toggleSuspend: function(id, action) {
+    var verb = (action === 'suspend') ? 'suspend' : 'activate';
+    fetch('/api/admin/customers/' + id + '/suspend?action=' + verb, {
+      method: 'POST',
+      headers: Object.assign({ 'Content-Type': 'application/json' }, CustomersApp.getAuthHeader())
+    })
+    .then(function(res) {
+      if (!res.ok) throw new Error('Action failed with HTTP ' + res.status);
+      return res.json();
+    })
+    .then(function(updated) {
+      CustomersApp.toast('Customer account ' + (updated.is_active ? 'activated' : 'suspended') + ' successfully in PostgreSQL.', true);
+      CustomersApp.loadList();
+      CustomersApp.loadStats();
+    })
+    .catch(function(err) {
+      CustomersApp.toast(err.message, false);
+    });
+  },
+
+  openEditModal: function(id) {
+    var cust = CustomersApp.data.find(function(c) { return c.id === id; });
+    if (!cust) return;
+
+    var c = document.getElementById('modalContainer');
+    c.innerHTML = '<div class="modal-overlay" id="custModal" onclick="if(event.target===this)CustomersApp.closeModal()">' +
+      '<div class="modal-card">' +
+        '<div class="modal-header">' +
+          '<span>Edit Customer #' + cust.id + ' (' + escapeHtml(cust.email) + ')</span>' +
+          '<button class="btn sm" onclick="CustomersApp.closeModal()">✕</button>' +
+        '</div>' +
+        '<form id="editCustForm" onsubmit="event.preventDefault(); CustomersApp.submitEdit(' + cust.id + ');">' +
+          '<div class="modal-body">' +
+            '<div class="fg">' +
+              '<label for="edit_cust_name">Full Name</label>' +
+              '<input id="edit_cust_name" value="' + escapeHtml(cust.full_name || '') + '" required>' +
+            '</div>' +
+            '<div class="fg">' +
+              '<label for="edit_cust_phone">Phone / Mobile Number</label>' +
+              '<input id="edit_cust_phone" value="' + escapeHtml(cust.phone_number || '') + '">' +
+            '</div>' +
+            '<div class="fg-grid">' +
+              '<div class="fg">' +
+                '<label for="edit_cust_role">Role</label>' +
+                '<select id="edit_cust_role">' +
+                  '<option value="User"' + (cust.role === 'User' ? ' selected' : '') + '>User</option>' +
+                  '<option value="Admin"' + (cust.role === 'Admin' ? ' selected' : '') + '>Admin</option>' +
+                  '<option value="Super admin"' + (cust.role === 'Super admin' ? ' selected' : '') + '>Super admin</option>' +
+                '</select>' +
+              '</div>' +
+              '<div class="fg">' +
+                '<label for="edit_cust_mfa">MFA Type</label>' +
+                '<select id="edit_cust_mfa">' +
+                  '<option value="SMS"' + (cust.mfa_type === 'SMS' ? ' selected' : '') + '>SMS</option>' +
+                  '<option value="Authenticator"' + (cust.mfa_type === 'Authenticator' ? ' selected' : '') + '>Authenticator</option>' +
+                  '<option value="None"' + (cust.mfa_type === 'None' ? ' selected' : '') + '>None</option>' +
+                '</select>' +
+              '</div>' +
+            '</div>' +
+            '<div class="fg-grid">' +
+              '<div class="fg">' +
+                '<label for="edit_cust_active">Account Status</label>' +
+                '<select id="edit_cust_active">' +
+                  '<option value="true"' + (cust.is_active ? ' selected' : '') + '>Active</option>' +
+                  '<option value="false"' + (!cust.is_active ? ' selected' : '') + '>Suspended</option>' +
+                '</select>' +
+              '</div>' +
+              '<div class="fg">' +
+                '<label for="edit_cust_verified">Identity Verification</label>' +
+                '<select id="edit_cust_verified">' +
+                  '<option value="true"' + (cust.is_verified ? ' selected' : '') + '>Verified</option>' +
+                  '<option value="false"' + (!cust.is_verified ? ' selected' : '') + '>Unverified (Pending)</option>' +
+                '</select>' +
+              '</div>' +
+            '</div>' +
+          '</div>' +
+          '<div class="modal-footer">' +
+            '<button type="button" class="btn" onclick="CustomersApp.closeModal()">Cancel</button>' +
+            '<button type="submit" class="btn p" id="btnSubmitEditCust">Save Changes</button>' +
+          '</div>' +
+        '</form>' +
+      '</div>' +
+    '</div>';
+    document.getElementById('edit_cust_name').focus();
+  },
+
+  submitEdit: function(id) {
+    var btn = document.getElementById('btnSubmitEditCust');
+    if (btn) btn.disabled = true;
+
+    var payload = {
+      full_name: document.getElementById('edit_cust_name').value.trim(),
+      phone_number: document.getElementById('edit_cust_phone').value.trim() || null,
+      role: document.getElementById('edit_cust_role').value,
+      mfa_type: document.getElementById('edit_cust_mfa').value,
+      is_active: document.getElementById('edit_cust_active').value === 'true',
+      is_verified: document.getElementById('edit_cust_verified').value === 'true'
+    };
+
+    fetch('/api/admin/customers/' + id, {
+      method: 'PATCH',
+      headers: Object.assign({ 'Content-Type': 'application/json' }, CustomersApp.getAuthHeader()),
+      body: JSON.stringify(payload)
+    })
+    .then(function(res) {
+      if (!res.ok) throw new Error('Update failed with HTTP ' + res.status);
+      return res.json();
+    })
+    .then(function(updated) {
+      CustomersApp.closeModal();
+      CustomersApp.toast('Customer profile #' + id + ' updated in PostgreSQL.', true);
+      CustomersApp.loadList();
+      CustomersApp.loadStats();
+    })
+    .catch(function(err) {
+      if (btn) btn.disabled = false;
+      CustomersApp.toast(err.message, false);
+    });
+  },
+
+  exportCSV: function() {
+    if (!CustomersApp.data || CustomersApp.data.length === 0) {
+      CustomersApp.toast('No customer records to export', false);
+      return;
+    }
+    var headers = ['ID', 'Full Name', 'Email', 'Phone Number', 'Role', 'Verified', 'MFA', 'Status', 'Created At'];
+    var rows = CustomersApp.data.map(function(c) {
+      return [
+        c.id,
+        '"' + (c.full_name || '').replace(/"/g, '""') + '"',
+        '"' + (c.email || '').replace(/"/g, '""') + '"',
+        '"' + (c.phone_number || '').replace(/"/g, '""') + '"',
+        '"' + (c.role || '').replace(/"/g, '""') + '"',
+        c.is_verified ? 'Yes' : 'No',
+        '"' + (c.mfa_type || 'SMS') + '"',
+        c.status || (c.is_active ? 'Active' : 'Suspended'),
+        '"' + (c.created_at || '') + '"'
+      ].join(',');
+    });
+    var csvContent = 'data:text/csv;charset=utf-8,' + [headers.join(','), rows.join('\n')].join('\n');
+    var encodedUri = encodeURI(csvContent);
+    var link = document.createElement('a');
+    link.setAttribute('href', encodedUri);
+    link.setAttribute('download', 'customers_export_' + new Date().toISOString().slice(0, 10) + '.csv');
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    CustomersApp.toast('Exported ' + CustomersApp.data.length + ' customer records to CSV.', true);
+  },
+
+  closeModal: function() {
+    var c = document.getElementById('modalContainer');
+    if (c) c.innerHTML = '';
+  }
+};
+
+var P={
+overview:function(){return head('Overview','Operations snapshot for the last 30 days.',['GET /admin/stats/overview'])+
+'<div class="row c4">'+kpi('...', 'Registered customers', 'kpiOverviewCustCount')+kpi('21,905','Linked accounts')+kpi('37','Open disputes')+kpi('4','Disputes near SLA breach')+'</div>'+
+'<div class="row c2"><div class="card"><h2>New links per week</h2><div class="chart" role="img" aria-label="Weekly account links">'+[38,52,47,66,71,60,84,92].map(function(h){return '<i style="height:'+h+'%"></i>'}).join('')+'</div><p class="note">Replace with GET /admin/stats/links?period=weekly</p></div>'+
+'<div class="card"><h2>Needs attention</h2>'+tbl(['Item','Status'],[['Zenith Bank connector',tg('Maintenance')],['4 disputes < 6h to SLA',tg('Open')],['318 consents expire in 7 days',tg('Expiring')],['OTP provider error rate 2.1%',tg('Degraded')]])+'</div></div>'},
+
+customers:function(){
+  return head('Customers','Search and support customer profiles backed by PostgreSQL database.',['GET /api/admin/customers','GET /api/admin/customers/{id}','POST /api/admin/customers/{id}/suspend','PATCH /api/admin/customers/{id}'])+
+  '<div class="row c4" id="custKpiRow">'+
+    kpi('...', 'Registered customers', 'kpiCustTotal')+
+    kpi('...', 'Active accounts', 'kpiCustActive')+
+    kpi('...', 'Suspended accounts', 'kpiCustSuspended')+
+    kpi('...', 'Pending verification', 'kpiCustUnverified')+
+  '</div>'+
+  '<div class="bar">'+
+    '<input type="search" id="custSearchInput" placeholder="Search by customer name, email, mobile..." style="min-width:280px;" aria-label="Search customers">'+
+    '<select id="custStatusFilter" aria-label="Filter status">'+
+      '<option value="">All statuses</option>'+
+      '<option value="Active">Active</option>'+
+      '<option value="Suspended">Suspended</option>'+
+      '<option value="Pending">Pending / Unverified</option>'+
+    '</select>'+
+    '<button class="btn" id="btnExportCustCsv">Export CSV</button>'+
+    '<button class="btn" id="btnRefreshCust">Refresh</button>'+
+  '</div>'+
+  '<div class="card">'+
+    '<div id="custTableContainer">'+
+      '<div style="padding:24px;text-align:center;color:var(--mute);">Querying PostgreSQL database...</div>'+
+    '</div>'+
+  '</div>';
+},
+
+consents:function(){return head('Consent register','Evidence of what each customer allowed, for how long, and when it was withdrawn.',['GET /admin/consents','GET /admin/consents/{id}'])+
+bar(srch+'<select aria-label="Status"><option>All</option><option>Active</option><option>Expiring in 7 days</option><option>Withdrawn</option></select>')+
+'<div class="card">'+tbl(['Consent ID','Customer','Institution','Scope','Granted','Expires','Status'],[['CNS-10231','Adewale Afolabi','GTBank','Accounts, balances, transactions','20 Jul 2026','18 Oct 2026',tg('Expiring')],['CNS-10232','Adewale Afolabi','Access Bank','Accounts, balances, transactions','23 Jul 2026','21 Oct 2026',tg('Expiring')],['CNS-10310','Ngozi Eze','UBA','Accounts, balances, transactions','03 Aug 2026','01 Nov 2026',tg('Active')],['CNS-09877','Amaka Obi','FirstBank','Accounts, balances, transactions','02 Jun 2026','31 Aug 2026',tg('Withdrawn')]])+'</div><p class="note">Read-only by design: admins can view consent evidence but never extend or recreate a consent on a customer’s behalf.</p>'},
+
+connections:function(){
+  return head('Institutions and connections','Aggregator coverage and sync health per bank or wallet (powered by PostgreSQL).',['GET /api/admin/institutions','POST /api/admin/institutions','PUT /api/admin/institutions/{id}','DELETE /api/admin/institutions/{id}'])+
+  '<div class="row c4" id="instKpiRow">'+
+    kpi('...', 'Sync success (24h)', 'kpiAvgSuccess')+
+    kpi('...', 'Institutions live', 'kpiLiveCount')+
+    kpi('...', 'In maintenance', 'kpiMaintCount')+
+    kpi('...', 'Total linked accounts', 'kpiTotalAccounts')+
+  '</div>'+
+  '<div class="bar">'+
+    '<input type="search" id="instSearchInput" placeholder="Search institutions, codes, providers..." style="min-width:280px;" aria-label="Search institutions">'+
+    '<select id="instStatusFilter" aria-label="Filter status">'+
+      '<option value="">All statuses</option>'+
+      '<option value="Healthy">Healthy</option>'+
+      '<option value="Degraded">Degraded</option>'+
+      '<option value="Maintenance">Maintenance</option>'+
+      '<option value="Suspended">Suspended</option>'+
+    '</select>'+
+    '<button class="btn p" id="btnOpenAddModal">+ Add Institution</button>'+
+    '<button class="btn" id="btnRefreshInst">Refresh</button>'+
+  '</div>'+
+  '<div class="card">'+
+    '<div id="instTableContainer">'+
+      '<div style="padding:24px;text-align:center;color:var(--mute);">Connecting to PostgreSQL...</div>'+
+    '</div>'+
+  '</div>';
+},
+
+transactions:function(){return head('Transaction monitor','Support lookup. Read-only; transactions are never edited by staff.',['GET /admin/transactions','GET /admin/transactions/{id}'])+
+bar(srch+'<select aria-label="Institution"><option>All institutions</option></select><select aria-label="Category"><option>All categories</option></select><input type="date" aria-label="From date">')+
+'<div class="card">'+tbl(['Reference','Customer','Institution','Description','Category','Amount','Status'],[['TRF-892104','Adewale Afolabi','Access','Transfer to T. Bello','Transfer','−₦15,000',tg('Pending')],['POS-551820','Adewale Afolabi','GTBank','Shoprite','Food','−₦24,650',tg('Sent')],['TRF-770021','Ngozi Eze','UBA','Salary','Income','+₦580,000',tg('Sent')],['TRF-660113','Tunde Bakare','FirstBank','Transfer to M. Ade','Transfer','−₦45,000',tg('Failed')]])+'</div>'},
+
+disputes:function(){var d=D[sel];return head('Dispute queue','Work cases in SLA order. Status changes are logged on the customer’s timeline.',['GET /admin/disputes','GET /admin/disputes/{id}','PATCH /admin/disputes/{id}/status','POST /admin/disputes/{id}/notes'])+
+bar(srch+'<select aria-label="Status"><option>All statuses</option><option>Open</option><option>Awaiting bank</option><option>Under review</option></select><select aria-label="Institution"><option>All institutions</option></select>')+
+'<div class="row c2"><div class="card">'+tbl(['Case','Customer','Type','Amount','Bank','Status','SLA left'],D.map(function(r){return [r[0],r[1],r[2],r[3],r[4],tg(r[5]),r[6]]}),sel)+'</div>'+
+'<div class="card"><h2>'+d[0]+'</h2><div class="sla">'+d[6]+'</div><p class="note" style="margin:0 0 12px">until bank SLA, '+d[4]+'</p>'+
+'<dl class="kv"><dt>Customer</dt><dd>'+d[1]+'</dd><dt>Type</dt><dd>'+d[2]+'</dd><dt>Amount</dt><dd>'+d[3]+'</dd><dt>Evidence</dt><dd>receipt.pdf, screenshot.png</dd><dt>Assigned</dt><dd>Support agent 3</dd></dl>'+
+'<ul class="tl"><li class="now">Sent to '+d[4]+'<small>10:21, response requested</small></li><li>Reviewed by support<small>09:18</small></li><li>Case submitted<small>08:55</small></li></ul>'+
+'<select aria-label="New status"><option>Set status…</option><option>Under review</option><option>Awaiting bank</option><option>Resolved</option><option>Closed</option></select>'+
+'<div class="bar" style="margin:10px 0 0"><button class="btn p">Save status</button><button class="btn">Add note</button><button class="btn">Request info</button></div></div></div>'},
+
+alerts:function(){return head('Alerts and notifications','Message templates and delivery health.',['GET /admin/notification-templates','PUT /admin/notification-templates/{id}','GET /admin/notifications/log'])+
+'<div class="row c2"><div class="card"><h2>Templates</h2>'+tbl(['Template','Channel','Trigger','Active'],[['Low balance','Push','Balance below threshold','On'],['Bill reminder','Push','N days before due','On'],['Consent expiring','Push, SMS','7 days before expiry','On'],['Dispute update','Push','Status change','On'],['Price increase','Push','Recurring amount rises','Off']])+'</div>'+
+'<div class="card"><h2>Edit: Consent expiring</h2><p style="margin:0 0 6px">Message</p><input style="width:100%" value="Your access to {institution} ends on {date}. Renew to keep your data up to date."><p class="note">Variables: {institution} {date} {name}</p><div class="bar" style="margin-top:10px"><button class="btn p">Save template</button><button class="btn">Send test</button></div></div></div>'+
+'<div class="card"><h2>Recent delivery log</h2>'+tbl(['Time','Customer','Template','Channel','Result'],[['10:24','Adewale Afolabi','Dispute update','Push',tg('Sent')],['10:02','Ngozi Eze','Low balance','Push',tg('Sent')],['09:48','Tunde Bakare','OTP','SMS',tg('Failed')]])+'</div>'},
+
+staff:function(){return head('Staff and roles','Control who can see and change what in this panel.',['GET /admin/staff','POST /admin/staff','PUT /admin/roles/{id}/permissions'])+
+'<div class="row c2"><div class="card"><h2>Staff</h2>'+tbl(['Name','Email','Role','MFA','Status'],[['Chidi Okafor','c.okafor@…','Super admin',tg('Verified'),tg('Active')],['Funke Alade','f.alade@…','Dispute agent',tg('Verified'),tg('Active')],['Ibrahim Musa','i.musa@…','Compliance',tg('Verified'),tg('Active')],['Temi Ojo','t.ojo@…','Read-only',tg('Unverified'),tg('Pending')]])+'</div>'+
+'<div class="card"><h2>Role permissions</h2>'+tbl(['Area','Agent','Compliance','Admin'],[['Customers','View','View','Edit'],['Consents','View','View','View'],['Disputes','Edit','View','Edit'],['Institutions','–','View','Edit'],['Audit log','–','View','View'],['Staff','–','–','Edit']])+'</div></div>'},
+
+audit:function(){return head('Audit log','Immutable record of staff actions and sensitive data access.',['GET /admin/audit-logs'])+
+bar(srch+'<select aria-label="Action"><option>All actions</option><option>Status change</option><option>Data export</option><option>Login</option></select><input type="date" aria-label="From date"><button class="btn">Export CSV</button>')+
+'<div class="card">'+tbl(['Time','Staff','Action','Target','IP address'],[['16 Oct 10:21','Funke Alade','Status change → Awaiting bank','MCH-240725-018','102.89.x.x'],['16 Oct 09:55','Ibrahim Musa','Viewed consent','CNS-10231','102.89.x.x'],['16 Oct 09:12','Chidi Okafor','Set institution live','Zenith Bank','105.112.x.x'],['15 Oct 17:40','Funke Alade','Exported customers CSV','142 rows','102.89.x.x']])+'</div>'}
+};
+
+var N=[['overview','Overview'],['customers','Customers'],['consents','Consent register'],['connections','Institutions'],['transactions','Transactions'],['disputes','Disputes'],['alerts','Alerts and notifications'],['staff','Staff and roles'],['audit','Audit log']];
+var cur=(location.hash?location.hash.slice(1):DEFAULT_PAGE);if(!P[cur])cur=DEFAULT_PAGE;
+
+function show(k){
+  cur=k;
+  try{history.replaceState(null,'','#'+k)}catch(e){}
+
+  var staff=null;try{staff=JSON.parse(localStorage.getItem('mch_admin_user'))}catch(e){}
+  var staffName=staff?staff.name:'Admin User';
+  var staffRole=staff?staff.role:'Super admin';
+  var userBox='<div style="margin-top:auto;padding-top:14px;border-top:1px solid var(--line);font-size:12px;">'+
+  '<div style="font-weight:600;color:var(--ink);">'+escapeHtml(staffName)+'</div>'+
+  '<div style="color:var(--mute);margin-bottom:8px;font-size:11px;">'+escapeHtml(staffRole)+'</div>'+
+  '<a href="login.html" id="logoutLink" style="display:inline-block;text-align:center;text-decoration:none;padding:5px 8px;font-size:11px;color:var(--bad);background:var(--badsoft);border:1px solid var(--bad);border-radius:4px;width:100%;">Sign Out</a>'+
+  '</div>';
+
+  document.getElementById('nav').innerHTML='<div class="brand">MCH Admin<small>Platform Console</small></div>'+N.map(function(n){
+    return '<button data-k="'+n[0]+'" class="'+(n[0]===cur?'on':'')+'"'+(n[0]===cur?' aria-current="page"':'')+'>'+n[1]+'</button>';
+  }).join('')+userBox;
+
+  var outBtn=document.getElementById('logoutLink');
+  if(outBtn){
+    outBtn.addEventListener('click',function(){
+      localStorage.removeItem('mch_admin_token');
+      localStorage.removeItem('mch_admin_user');
+    });
+  }
+
+  document.getElementById('main').innerHTML=P[k]();
+  window.scrollTo(0,0);
+
+  // Initialize dynamic PostgreSQL modules
+  if(k==='connections'){
+    InstitutionsApp.init();
+  } else if(k==='customers'){
+    CustomersApp.init();
+  } else if(k==='overview'){
+    CustomersApp.loadStats();
+    InstitutionsApp.loadStats();
+  }
+}
+
+document.getElementById('nav').addEventListener('click',function(e){
+  var b=e.target.closest('button');
+  if(b) show(b.dataset.k);
+});
+
+document.getElementById('main').addEventListener('click',function(e){
+  var r=e.target.closest('tr[data-i]');
+  if(r&&cur==='disputes'){
+    sel=+r.dataset.i;
+    var y=window.scrollY;
+    show('disputes');
+    window.scrollTo(0,y);
+  }
+});
+
+show(cur);
+</script>
+</body>
+</html>

@@ -1,0 +1,592 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Connect Bank · FinanceHub</title>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #0e1514;
+      --surf: #162120;
+      --surf-hover: #1e2e2b;
+      --brand: #4cc2ac;
+      --brandhover: #5bd4bd;
+      --ink: #e6efed;
+      --mute: #97a8a4;
+      --line: #273533;
+      --ok: #6fd48f;
+      --font: 'IBM Plex Sans', -apple-system, sans-serif;
+      --mono: 'JetBrains Mono', monospace;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background-color: var(--bg);
+      color: var(--ink);
+      font-family: var(--font);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 20px 16px;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 440px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .header-box {
+      margin-bottom: 20px;
+      text-align: left;
+    }
+
+    .badge {
+      display: inline-block;
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      padding: 3px 8px;
+      border-radius: 99px;
+      background: rgba(76, 194, 172, 0.15);
+      color: var(--brand);
+      border: 1px solid var(--brand);
+      margin-bottom: 10px;
+    }
+
+    h1 {
+      font-size: 22px;
+      font-weight: 700;
+      color: var(--ink);
+      margin-bottom: 6px;
+    }
+
+    p {
+      font-size: 13px;
+      color: var(--mute);
+      line-height: 1.4;
+    }
+
+    .bank-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-bottom: 24px;
+    }
+
+    .bank-card {
+      background: var(--surf);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 14px 16px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .bank-card:hover, .bank-card:active {
+      border-color: var(--brand);
+      background: var(--surf-hover);
+      transform: translateY(-1px);
+    }
+
+    .bank-icon {
+      width: 44px;
+      height: 44px;
+      border-radius: 10px;
+      background: rgba(76, 194, 172, 0.1);
+      border: 1px solid var(--line);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 22px;
+      flex-shrink: 0;
+    }
+
+    .bank-info {
+      flex: 1;
+      text-align: left;
+    }
+
+    .bank-name {
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--ink);
+      margin-bottom: 2px;
+    }
+
+    .bank-desc {
+      font-size: 12px;
+      color: var(--mute);
+    }
+
+    .bank-arrow {
+      color: var(--brand);
+      font-size: 18px;
+      font-weight: 600;
+    }
+
+    /* Modal Styling */
+    .modal-overlay {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0, 0, 0, 0.85);
+      backdrop-filter: blur(4px);
+      z-index: 999;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+    }
+
+    .modal-card {
+      width: 100%;
+      max-width: 400px;
+      background: var(--surf);
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 16px 40px rgba(0,0,0,0.5);
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .modal-title {
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--ink);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .modal-close {
+      background: none;
+      border: none;
+      color: var(--mute);
+      font-size: 22px;
+      cursor: pointer;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      margin-bottom: 14px;
+      text-align: left;
+    }
+
+    .form-group label {
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--mute);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .form-input {
+      background: #090e0d;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 12px 14px;
+      font-size: 14px;
+      color: var(--ink);
+      font-family: var(--font);
+      outline: none;
+    }
+
+    .form-input:focus {
+      border-color: var(--brand);
+    }
+
+    .btn {
+      width: 100%;
+      background: var(--brand);
+      color: #05221d;
+      font-family: var(--font);
+      font-size: 15px;
+      font-weight: 600;
+      padding: 14px;
+      border-radius: 10px;
+      border: none;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: all 0.2s;
+      margin-top: 6px;
+    }
+
+    .btn:hover {
+      background: var(--brandhover);
+    }
+
+    /* Loading Overlay */
+    .loading-overlay {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(14, 21, 20, 0.95);
+      z-index: 9999;
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      text-align: center;
+    }
+
+    .spinner {
+      width: 48px;
+      height: 48px;
+      border: 3px solid rgba(76, 194, 172, 0.2);
+      border-top-color: var(--brand);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      margin-bottom: 20px;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    .loading-title {
+      font-size: 18px;
+      font-weight: 600;
+      margin-bottom: 6px;
+    }
+
+    .loading-sub {
+      font-size: 13px;
+      color: var(--mute);
+    }
+
+    /* Success Screen */
+    .success-container {
+      width: 100%;
+      max-width: 440px;
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      padding: 24px 0;
+    }
+
+    .success-box {
+      width: 100%;
+      background: var(--surf);
+      border: 1px solid var(--line);
+      border-radius: 20px;
+      padding: 32px 24px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      box-shadow: 0 16px 40px rgba(0,0,0,0.5);
+    }
+
+    .success-icon-wrap {
+      width: 76px;
+      height: 76px;
+      border-radius: 50%;
+      background: rgba(111, 212, 143, 0.15);
+      border: 2px solid var(--ok);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--ok);
+      font-size: 38px;
+      margin-bottom: 20px;
+    }
+
+    .details-card {
+      width: 100%;
+      background: #090e0d;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 16px;
+      margin: 20px 0;
+      text-align: left;
+    }
+
+    .details-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 8px 0;
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+      font-size: 13px;
+    }
+
+    .details-row:last-child {
+      border-bottom: none;
+    }
+
+    .details-label {
+      color: var(--mute);
+    }
+
+    .details-val {
+      font-weight: 600;
+      color: var(--ink);
+    }
+
+    .balance-val {
+      color: var(--brand);
+      font-family: var(--mono);
+      font-size: 16px;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- STEP 1: Bank Selection List -->
+  <div class="container" id="bankListContainer">
+    <div class="header-box">
+      <span class="badge">Open Banking</span>
+      <h1>Select Your Bank</h1>
+      <p>Choose your bank to authenticate and link with FinanceHub.</p>
+    </div>
+
+    <div class="bank-list">
+      <!-- GTBank -->
+      <div class="bank-card" onclick="openAuthModal('Guaranty Trust Bank (GTBank)', '0123456789', 450000.0, '058')">
+        <div class="bank-icon">🏦</div>
+        <div class="bank-info">
+          <div class="bank-name">GTBank</div>
+          <div class="bank-desc">Guaranty Trust Bank · Instant Sync</div>
+        </div>
+        <div class="bank-arrow">➔</div>
+      </div>
+
+      <!-- Access Bank -->
+      <div class="bank-card" onclick="openAuthModal('Access Bank', '9876543210', 125000.0, '044')">
+        <div class="bank-icon">🏦</div>
+        <div class="bank-info">
+          <div class="bank-name">Access Bank</div>
+          <div class="bank-desc">Access Bank PLC · Real-time Balance</div>
+        </div>
+        <div class="bank-arrow">➔</div>
+      </div>
+
+      <!-- First Bank of Nigeria -->
+      <div class="bank-card" onclick="openAuthModal('First Bank of Nigeria (FBN)', '5544332211', 320000.0, '011')">
+        <div class="bank-icon">🏦</div>
+        <div class="bank-info">
+          <div class="bank-name">FirstBank</div>
+          <div class="bank-desc">First Bank of Nigeria · Verified</div>
+        </div>
+        <div class="bank-arrow">➔</div>
+      </div>
+
+      <!-- Zenith Bank -->
+      <div class="bank-card" onclick="openAuthModal('Zenith Bank', '3322114455', 780000.0, '057')">
+        <div class="bank-icon">🏦</div>
+        <div class="bank-info">
+          <div class="bank-name">Zenith Bank</div>
+          <div class="bank-desc">Zenith Bank PLC · Live Connected</div>
+        </div>
+        <div class="bank-arrow">➔</div>
+      </div>
+
+      <!-- UBA -->
+      <div class="bank-card" onclick="openAuthModal('United Bank for Africa (UBA)', '6677889900', 210000.0, '033')">
+        <div class="bank-icon">🏦</div>
+        <div class="bank-info">
+          <div class="bank-name">UBA</div>
+          <div class="bank-desc">United Bank for Africa</div>
+        </div>
+        <div class="bank-arrow">➔</div>
+      </div>
+
+      <!-- Stanbic IBTC -->
+      <div class="bank-card" onclick="openAuthModal('Stanbic IBTC Bank', '8899001122', 95000.0, '221')">
+        <div class="bank-icon">🏦</div>
+        <div class="bank-info">
+          <div class="bank-name">Stanbic IBTC</div>
+          <div class="bank-desc">Stanbic IBTC Bank</div>
+        </div>
+        <div class="bank-arrow">➔</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- STEP 2: Bank Login Auth Modal -->
+  <div class="modal-overlay" id="authModal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <div class="modal-title" id="authModalTitle">
+          <span>🏦</span> <span id="authBankName">GTBank Login</span>
+        </div>
+        <button class="modal-close" onclick="closeAuthModal()">&times;</button>
+      </div>
+
+      <p style="font-size: 13px; color: var(--mute); margin-bottom: 16px; text-align: left;">
+        Enter your online banking credentials to authorize and link your account (Mono Sandbox).
+      </p>
+
+      <form id="bankLoginForm" onsubmit="handleBankAuthSubmit(event)">
+        <div class="form-group">
+          <label>Bank User ID / Account Number</label>
+          <input type="text" id="bankUserNumber" class="form-input" value="0123456789" required>
+        </div>
+
+        <div class="form-group">
+          <label>Internet Banking PIN / Password</label>
+          <input type="password" id="bankPassword" class="form-input" value="123456" required>
+        </div>
+
+        <div class="form-group">
+          <label>One-Time Password (OTP)</label>
+          <input type="text" id="bankOtp" class="form-input" value="882190" required>
+        </div>
+
+        <button type="submit" class="btn">
+          <span>🔐 Authorize & Link Bank</span>
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- STEP 3: Verifying Loader -->
+  <div class="loading-overlay" id="loadingOverlay">
+    <div class="spinner"></div>
+    <div class="loading-title" id="loadingTitle">Authenticating with Bank...</div>
+    <div class="loading-sub" id="loadingSub">Verifying credentials & saving to PostgreSQL...</div>
+  </div>
+
+  <!-- STEP 4: Success Message Screen -->
+  <div class="success-container" id="successContainer">
+    <div class="success-box">
+      <div class="success-icon-wrap">✓</div>
+      <h1 style="color: var(--ok); font-size: 22px; margin-bottom: 6px;">Bank Linked Successfully!</h1>
+      <p style="font-size: 14px; color: var(--mute);">Your financial institution has been authorized and connected to your account.</p>
+
+      <div class="details-card">
+        <div class="details-row">
+          <span class="details-label">Connected Bank</span>
+          <span class="details-val" id="dispBankName">Guaranty Trust Bank</span>
+        </div>
+        <div class="details-row">
+          <span class="details-label">Account Number</span>
+          <span class="details-val" id="dispAccNum">0123****89</span>
+        </div>
+        <div class="details-row">
+          <span class="details-label">Account Status</span>
+          <span class="details-val" style="color: var(--ok);">● Verified & Active</span>
+        </div>
+        <div class="details-row">
+          <span class="details-label">Current Balance</span>
+          <span class="details-val balance-val" id="dispBalance">₦ 450,000.00</span>
+        </div>
+      </div>
+
+      <button class="btn" id="goToDashboardBtn" style="background: var(--ok); color: #072414;">
+        <span>Continue to Dashboard ➔</span>
+      </button>
+    </div>
+  </div>
+
+  <script>
+    // Read user_id from query params (?user_id=11)
+    const urlParams = new URLSearchParams(window.location.search);
+    const userId = urlParams.get("user_id") || urlParams.get("userId") || "11";
+
+    let selectedBank = {
+      name: "Guaranty Trust Bank (GTBank)",
+      accountNumber: "0123456789",
+      balance: 450000.0,
+      bankCode: "058"
+    };
+
+    let redirectDeepLink = "";
+
+    function openAuthModal(bankName, accNumber, balance, bankCode) {
+      selectedBank = { name: bankName, accountNumber: accNumber, balance: balance, bankCode: bankCode };
+      document.getElementById("authBankName").innerText = bankName + " Auth";
+      document.getElementById("bankUserNumber").value = accNumber;
+      document.getElementById("authModal").style.display = "flex";
+    }
+
+    function closeAuthModal() {
+      document.getElementById("authModal").style.display = "none";
+    }
+
+    async function handleBankAuthSubmit(e) {
+      e.preventDefault();
+      closeAuthModal();
+
+      // Show verifying loader
+      const loader = document.getElementById("loadingOverlay");
+      loader.style.display = "flex";
+      document.getElementById("loadingTitle").innerText = "Authorizing " + selectedBank.name + "...";
+      document.getElementById("loadingSub").innerText = "Saving account into PostgreSQL for User ID: " + userId;
+
+      try {
+        // Save to PostgreSQL via backend API
+        const res = await fetch(`/api/mono/users/${encodeURIComponent(userId)}/link-account`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            bank_name: selectedBank.name,
+            account_number: selectedBank.accountNumber,
+            balance: selectedBank.balance,
+            currency: "NGN",
+            account_type: "savings"
+          })
+        });
+
+        const data = await res.json();
+        console.log("Database save response:", data);
+
+        // Hide loader & bank list, show Success Screen
+        loader.style.display = "none";
+        document.getElementById("bankListContainer").style.display = "none";
+        document.getElementById("successContainer").style.display = "flex";
+
+        // Fill Details in Success Card
+        document.getElementById("dispBankName").innerText = selectedBank.name;
+        document.getElementById("dispAccNum").innerText = selectedBank.accountNumber;
+        document.getElementById("dispBalance").innerText = "₦ " + selectedBank.balance.toLocaleString("en-NG", { minimumFractionDigits: 2 });
+
+        // Build Deep Link URL for Android
+        const accountId = (data.account && data.account.mono_account_id) || "sandbox_acc_01";
+        redirectDeepLink = `financehub://bank-success?user_id=${encodeURIComponent(userId)}&account_id=${encodeURIComponent(accountId)}&bank_name=${encodeURIComponent(selectedBank.name)}`;
+
+        // Button Click to go to Dashboard
+        document.getElementById("goToDashboardBtn").onclick = () => {
+          navigateDashboard();
+        };
+
+      } catch (err) {
+        console.error("Auth error:", err);
+        loader.style.display = "none";
+        alert("Failed to link bank: " + err.message);
+      }
+    }
+
+    function navigateDashboard() {
+      // 1. Trigger Android JavaScript Bridge if available
+      if (window.AndroidBridge && typeof window.AndroidBridge.onBankLinkSuccess === "function") {
+        window.AndroidBridge.onBankLinkSuccess(userId, selectedBank.name);
+      }
+      // 2. Trigger Custom URL Scheme
+      window.location.href = redirectDeepLink;
+    }
+  </script>
+</body>
+</html>
