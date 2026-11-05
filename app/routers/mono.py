@@ -18,6 +18,7 @@ from app.core.config import settings
 from app.core.database import get_db
 from app.models.user import User
 from app.models.user_bank_account import UserBankAccount
+from app.models.transfer import Transfer
 from app.services.mono_service import MonoClient
 
 router = APIRouter(prefix="/api/mono", tags=["Mono (Sandbox)"])
@@ -260,6 +261,43 @@ def get_user_linked_bank_accounts(
     total_balance = sum(acc.balance for acc in accounts)
     primary_currency = accounts[0].currency if accounts else "NGN"
 
+    # Query transfer history for user to compute spend this month & recent transactions
+    transfers = (
+        db.query(Transfer)
+        .filter(Transfer.user_id == user_id)
+        .order_by(Transfer.id.desc())
+        .all()
+    )
+
+    total_transfers = sum(t.amount for t in transfers)
+    spend_this_month = round(total_transfers, 2)
+    formatted_spend_this_month = f"₦{spend_this_month:,.2f}"
+
+    recent_transactions = []
+    for t in transfers:
+        ben_name = t.beneficiary.name if t.beneficiary else (t.note or "Beneficiary")
+        bank_name = t.account.bank_name if t.account else "Bank"
+        date_str = t.created_at.strftime("%d %b") if t.created_at else "Today"
+        display_title = ben_name if ben_name.lower().startswith("transfer") else f"Transfer to {ben_name}"
+
+        recent_transactions.append({
+            "id": t.id,
+            "reference": t.reference,
+            "title": display_title,
+            "description": t.note or display_title,
+            "beneficiary_name": ben_name,
+            "account_name": t.account.account_name if t.account else "Linked Account",
+            "bank_name": bank_name,
+            "account_meta": f"{bank_name} • {date_str}",
+            "date": date_str,
+            "created_at": t.created_at.isoformat() if t.created_at else None,
+            "amount": -round(t.amount, 2),
+            "positive_amount": round(t.amount, 2),
+            "currency": t.currency or "NGN",
+            "formatted_amount": f"-₦{t.amount:,.2f}",
+            "status": t.status or "completed",
+        })
+
     return {
         "user_id": user.id,
         "user_name": user.full_name,
@@ -282,6 +320,9 @@ def get_user_linked_bank_accounts(
             }
             for acc in accounts
         ],
+        "spend_this_month": spend_this_month,
+        "open_disputes": 0,
+        "recent_transactions": recent_transactions,
     }
 
 
@@ -410,6 +451,41 @@ def list_all_linked_user_accounts(
             "created_at": acc.created_at.isoformat() if acc.created_at else None,
         })
 
+    # Query transfer history
+    transfers_query = db.query(Transfer)
+    if target_user:
+        transfers_query = transfers_query.filter(Transfer.user_id == target_user.id)
+    transfers = transfers_query.order_by(Transfer.id.desc()).all()
+
+    total_transfers = sum(t.amount for t in transfers)
+    spend_this_month = round(total_transfers, 2)
+    formatted_spend_this_month = f"₦{spend_this_month:,.2f}"
+
+    recent_transactions = []
+    for t in transfers:
+        ben_name = t.beneficiary.name if t.beneficiary else (t.note or "Beneficiary")
+        bank_name = t.account.bank_name if t.account else "Bank"
+        date_str = t.created_at.strftime("%d %b") if t.created_at else "Today"
+        display_title = ben_name if ben_name.lower().startswith("transfer") else f"Transfer to {ben_name}"
+
+        recent_transactions.append({
+            "id": t.id,
+            "reference": t.reference,
+            "title": display_title,
+            "description": t.note or display_title,
+            "beneficiary_name": ben_name,
+            "account_name": t.account.account_name if t.account else "Linked Account",
+            "bank_name": bank_name,
+            "account_meta": f"{bank_name} • {date_str}",
+            "date": date_str,
+            "created_at": t.created_at.isoformat() if t.created_at else None,
+            "amount": -round(t.amount, 2),
+            "positive_amount": round(t.amount, 2),
+            "currency": t.currency or "NGN",
+            "formatted_amount": f"-₦{t.amount:,.2f}",
+            "status": t.status or "completed",
+        })
+    
     response_data: Dict[str, Any] = {
         "status": "success",
         "total_accounts": len(formatted_accounts),
@@ -417,6 +493,9 @@ def list_all_linked_user_accounts(
         "formatted_total_balance": f"₦{total_balance:,.2f}",
         "currency": primary_currency,
         "accounts": formatted_accounts,
+        "spend_this_month": spend_this_month,
+        "open_disputes": 0,
+        "recent_transactions": recent_transactions,
     }
 
     if target_user:
