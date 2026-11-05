@@ -176,6 +176,28 @@ def update_customer(
     return format_customer_response(user)
 
 
+@router.delete("/{customer_id}", summary="Delete Customer")
+def delete_customer(customer_id: int, db: Session = Depends(get_db)):
+    """
+    Delete a customer from PostgreSQL database.
+    """
+    user = db.query(User).filter(User.id == customer_id).first()
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Customer with ID {customer_id} not found.",
+        )
+
+    name = user.full_name or user.email
+    user.institutions.clear()
+    db.delete(user)
+    db.commit()
+    return {
+        "success": True,
+        "message": f"Customer '{name}' (ID: {customer_id}) successfully deleted from database.",
+    }
+
+
 # Link routes for /admin/customers alias
 @public_admin_router.get("", response_model=List[CustomerResponse], include_in_schema=False)
 def alias_list_customers(
@@ -195,3 +217,9 @@ def alias_get_customer(customer_id: int, db: Session = Depends(get_db)):
 @public_admin_router.post("/{customer_id}/suspend", response_model=CustomerResponse, include_in_schema=False)
 def alias_suspend_customer(customer_id: int, action: Optional[str] = Query(None), db: Session = Depends(get_db)):
     return toggle_customer_suspension(customer_id=customer_id, action=action, db=db)
+
+
+@public_admin_router.delete("/{customer_id}", include_in_schema=False)
+def alias_delete_customer(customer_id: int, db: Session = Depends(get_db)):
+    return delete_customer(customer_id=customer_id, db=db)
+

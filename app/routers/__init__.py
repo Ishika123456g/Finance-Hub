@@ -12,7 +12,12 @@ from app.routers.customer import (
     router as customer_router,
     public_admin_router as public_customer_router,
 )
+from app.routers.consent import (
+    router as consent_router,
+    public_admin_router as public_consent_router,
+)
 from app.routers.mono import router as mono_router
+from app.routers.payment import router as payment_router
 
 __all__ = [
     "auth_router",
@@ -20,7 +25,10 @@ __all__ = [
     "public_institution_router",
     "customer_router",
     "public_customer_router",
+    "consent_router",
+    "public_consent_router",
     "user_institution_router",
     "mono_router",
+    "payment_router",
 ]
 

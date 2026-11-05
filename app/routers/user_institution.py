@@ -46,3 +46,4 @@ def select_institutions_for_user(
     db.commit() 
     db.refresh(user)
     return institutions
+

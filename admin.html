@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>MCH Admin Panel · Dashboard</title>
+<title>MCH Admin Panel · Admin</title>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
 :root{--bg:#f4f6f5;--surf:#fff;--ink:#16211f;--mute:#5d6b68;--line:#dde3e1;--brand:#0f6b5c;--brandsoft:#dff1ed;--warn:#a85d00;--warnsoft:#fdeccf;--bad:#b3261e;--badsoft:#fbe0dd;--ok:#1d7a3e;--oksoft:#ddf2e3;--info:#2455a4;--infosoft:#e1eaf9;
@@ -717,6 +717,7 @@ var CustomersApp = {
           '<td style="text-align:right;white-space:nowrap;display:flex;justify-content:flex-end;gap:6px;">' +
             '<button class="btn sm" onclick="CustomersApp.openEditModal(' + cust.id + ')">Edit</button>' +
             toggleBtn +
+            '<button class="btn d sm" onclick="CustomersApp.openDeleteModal(' + cust.id + ', \'' + escapeHtml(cust.full_name || cust.email || 'Customer').replace(/'/g, "\\'") + '\')">Delete</button>' +
           '</td>' +
         '</tr>';
       });
@@ -852,6 +853,56 @@ var CustomersApp = {
     });
   },
 
+  openDeleteModal: function(id, name) {
+    var c = document.getElementById('modalContainer');
+    c.innerHTML = '<div class="modal-overlay" id="custModal" onclick="if(event.target===this)CustomersApp.closeModal()">' +
+      '<div class="modal-card">' +
+        '<div class="modal-header">' +
+          '<span style="color:var(--bad);">Delete Customer</span>' +
+          '<button class="btn sm" onclick="CustomersApp.closeModal()">✕</button>' +
+        '</div>' +
+        '<div class="modal-body">' +
+          '<p style="margin:0;font-size:14px;line-height:1.6;">Are you sure you want to permanently delete customer <b>' + escapeHtml(name) + '</b> (ID: #' + id + ') from PostgreSQL?</p>' +
+          '<p class="note" style="color:var(--bad);margin:0;">This action cannot be undone and will delete the customer and all associated records.</p>' +
+        '</div>' +
+        '<div class="modal-footer">' +
+          '<button type="button" class="btn" onclick="CustomersApp.closeModal()">Cancel</button>' +
+          '<button type="button" class="btn d" id="btnConfirmDeleteCust" onclick="CustomersApp.submitDelete(' + id + ')">Yes, Delete Customer</button>' +
+        '</div>' +
+      '</div>' +
+    '</div>';
+  },
+
+  submitDelete: function(id) {
+    var btn = document.getElementById('btnConfirmDeleteCust');
+    if (btn) btn.disabled = true;
+
+    fetch('/api/admin/customers/' + id, {
+      method: 'DELETE',
+      headers: Object.assign({ 'Content-Type': 'application/json' }, CustomersApp.getAuthHeader())
+    })
+    .then(function(res) {
+      if (!res.ok) {
+        return res.json().then(function(errData) {
+          throw new Error(errData.detail || 'Delete operation failed with HTTP ' + res.status);
+        }).catch(function(e) {
+          throw new Error(e.message || 'Delete operation failed with HTTP ' + res.status);
+        });
+      }
+      return res.json();
+    })
+    .then(function(data) {
+      CustomersApp.closeModal();
+      CustomersApp.toast(data.message || 'Customer deleted successfully.', true);
+      CustomersApp.loadList();
+      CustomersApp.loadStats();
+    })
+    .catch(function(err) {
+      if (btn) btn.disabled = false;
+      CustomersApp.toast(err.message, false);
+    });
+  },
+
   exportCSV: function() {
     if (!CustomersApp.data || CustomersApp.data.length === 0) {
       CustomersApp.toast('No customer records to export', false);
@@ -888,6 +939,146 @@ var CustomersApp = {
   }
 };
 
+var ConsentsApp = {
+  data: [],
+  getAuthHeader: function() {
+    var token = localStorage.getItem('mch_admin_token');
+    return token ? { 'Authorization': 'Bearer ' + token } : {};
+  },
+
+  init: function() {
+    var sInput = document.getElementById('consentSearchInput');
+    var sFilter = document.getElementById('consentStatusFilter');
+    var rBtn = document.getElementById('btnRefreshConsents');
+
+    var timer = null;
+    if (sInput) {
+      sInput.addEventListener('input', function() {
+        clearTimeout(timer);
+        timer = setTimeout(function() { ConsentsApp.loadList(); }, 250);
+      });
+    }
+
+    if (sFilter) {
+      sFilter.addEventListener('change', function() {
+        ConsentsApp.loadList();
+      });
+    }
+
+    if (rBtn) {
+      rBtn.addEventListener('click', function() {
+        ConsentsApp.loadList();
+      });
+    }
+
+    ConsentsApp.loadList();
+  },
+
+  loadList: function() {
+    var container = document.getElementById('consentTableContainer');
+    if (!container) return;
+
+    var sInput = document.getElementById('consentSearchInput');
+    var sFilter = document.getElementById('consentStatusFilter');
+    var search = sInput ? sInput.value.trim() : '';
+    var status = sFilter ? sFilter.value.trim() : '';
+
+    var params = new URLSearchParams();
+    if (search) params.append('search', search);
+    if (status && status !== 'All') params.append('status', status);
+
+    var url = '/api/admin/consents' + (params.toString() ? '?' + params.toString() : '');
+
+    container.innerHTML = '<div style="padding:28px;text-align:center;color:var(--mute);">Querying PostgreSQL database...</div>';
+
+    fetch(url, {
+      headers: Object.assign({ 'Content-Type': 'application/json' }, ConsentsApp.getAuthHeader())
+    })
+    .then(function(res) {
+      if (!res.ok) throw new Error('Database request failed with HTTP ' + res.status);
+      return res.json();
+    })
+    .then(function(list) {
+      ConsentsApp.data = list;
+      if (!list || list.length === 0) {
+        container.innerHTML = '<div style="padding:32px;text-align:center;">' +
+          '<div style="font-weight:600;font-size:16px;margin-bottom:6px;">No consent records found</div>' +
+          '<div style="color:var(--mute);">Try adjusting your search criteria or status filter.</div>' +
+        '</div>';
+        return;
+      }
+
+      var rows = list.map(function(c) {
+        return [
+          '<span style="cursor:pointer;color:var(--brand);font-weight:600;" onclick="ConsentsApp.openDetailModal(\'' + escapeHtml(c.consent_id) + '\')">' + escapeHtml(c.consent_id || c.consent_code || ('CNS-' + c.id)) + '</span>',
+          escapeHtml(c.customer || c.customer_name || 'Customer'),
+          escapeHtml(c.institution || c.institution_name || '–'),
+          escapeHtml(c.scope || 'Accounts, balances, transactions'),
+          escapeHtml(c.granted || c.granted_date || '–'),
+          escapeHtml(c.expires || c.expires_date || '–'),
+          tg(c.status || 'Active')
+        ];
+      });
+
+      container.innerHTML = tbl(
+        ['Consent ID', 'Customer', 'Institution', 'Scope', 'Granted', 'Expires', 'Status'],
+        rows
+      );
+    })
+    .catch(function(err) {
+      container.innerHTML = '<div style="padding:28px;text-align:center;color:var(--bad);">' +
+        'Failed to query consents from PostgreSQL: ' + escapeHtml(err.message) +
+        '<div style="margin-top:12px;"><button class="btn" onclick="ConsentsApp.loadList()">Retry</button></div>' +
+      '</div>';
+    });
+  },
+
+  openDetailModal: function(consentId) {
+    fetch('/api/admin/consents/' + consentId, {
+      headers: Object.assign({ 'Content-Type': 'application/json' }, ConsentsApp.getAuthHeader())
+    })
+    .then(function(res) {
+      if (!res.ok) throw new Error('Failed to load consent details');
+      return res.json();
+    })
+    .then(function(c) {
+      var modal = document.getElementById('modalContainer');
+      modal.innerHTML = '<div class="modal-overlay" id="consentModal" onclick="if(event.target===this)ConsentsApp.closeModal()">' +
+        '<div class="modal-card">' +
+          '<div class="modal-header">' +
+            '<span>Consent Evidence · ' + escapeHtml(c.consent_id) + '</span>' +
+            '<button class="btn sm" onclick="ConsentsApp.closeModal()">✕</button>' +
+          '</div>' +
+          '<div class="modal-body">' +
+            '<div class="fg"><label>Customer Name</label><input value="' + escapeHtml(c.customer) + '" readonly style="background:var(--bg)"></div>' +
+            (c.customer_email ? '<div class="fg"><label>Customer Email</label><input value="' + escapeHtml(c.customer_email) + '" readonly style="background:var(--bg)"></div>' : '') +
+            '<div class="fg-grid">' +
+              '<div class="fg"><label>Financial Institution</label><input value="' + escapeHtml(c.institution) + '" readonly style="background:var(--bg)"></div>' +
+              '<div class="fg"><label>Current Status</label><div style="margin-top:6px;">' + tg(c.status) + '</div></div>' +
+            '</div>' +
+            '<div class="fg"><label>Data Sharing Scope</label><input value="' + escapeHtml(c.scope) + '" readonly style="background:var(--bg)"></div>' +
+            '<div class="fg-grid">' +
+              '<div class="fg"><label>Granted Date</label><input value="' + escapeHtml(c.granted) + '" readonly style="background:var(--bg)"></div>' +
+              '<div class="fg"><label>Expiry Date</label><input value="' + escapeHtml(c.expires) + '" readonly style="background:var(--bg)"></div>' +
+            '</div>' +
+          '</div>' +
+          '<div class="modal-footer">' +
+            '<button type="button" class="btn" onclick="ConsentsApp.closeModal()">Close</button>' +
+          '</div>' +
+        '</div>' +
+      '</div>';
+    })
+    .catch(function(err) {
+      alert(err.message);
+    });
+  },
+
+  closeModal: function() {
+    var modal = document.getElementById('modalContainer');
+    if (modal) modal.innerHTML = '';
+  }
+};
+
 var P={
 overview:function(){return head('Overview','Operations snapshot for the last 30 days.',['GET /admin/stats/overview'])+
 '<div class="row c4">'+kpi('...', 'Registered customers', 'kpiOverviewCustCount')+kpi('21,905','Linked accounts')+kpi('37','Open disputes')+kpi('4','Disputes near SLA breach')+'</div>'+
@@ -895,7 +1086,7 @@ overview:function(){return head('Overview','Operations snapshot for the last 30 
 '<div class="card"><h2>Needs attention</h2>'+tbl(['Item','Status'],[['Zenith Bank connector',tg('Maintenance')],['4 disputes < 6h to SLA',tg('Open')],['318 consents expire in 7 days',tg('Expiring')],['OTP provider error rate 2.1%',tg('Degraded')]])+'</div></div>'},
 
 customers:function(){
-  return head('Customers','Search and support customer profiles backed by PostgreSQL database.',['GET /api/admin/customers','GET /api/admin/customers/{id}','POST /api/admin/customers/{id}/suspend','PATCH /api/admin/customers/{id}'])+
+  return head('Customers','Search and support customer profiles backed by PostgreSQL database.',['GET /api/admin/customers','GET /api/admin/customers/{id}','POST /api/admin/customers/{id}/suspend','PATCH /api/admin/customers/{id}','DELETE /api/admin/customers/{id}'])+
   '<div class="row c4" id="custKpiRow">'+
     kpi('...', 'Registered customers', 'kpiCustTotal')+
     kpi('...', 'Active accounts', 'kpiCustActive')+
@@ -920,9 +1111,24 @@ customers:function(){
   '</div>';
 },
 
-consents:function(){return head('Consent register','Evidence of what each customer allowed, for how long, and when it was withdrawn.',['GET /admin/consents','GET /admin/consents/{id}'])+
-bar(srch+'<select aria-label="Status"><option>All</option><option>Active</option><option>Expiring in 7 days</option><option>Withdrawn</option></select>')+
-'<div class="card">'+tbl(['Consent ID','Customer','Institution','Scope','Granted','Expires','Status'],[['CNS-10231','Adewale Afolabi','GTBank','Accounts, balances, transactions','20 Jul 2026','18 Oct 2026',tg('Expiring')],['CNS-10232','Adewale Afolabi','Access Bank','Accounts, balances, transactions','23 Jul 2026','21 Oct 2026',tg('Expiring')],['CNS-10310','Ngozi Eze','UBA','Accounts, balances, transactions','03 Aug 2026','01 Nov 2026',tg('Active')],['CNS-09877','Amaka Obi','FirstBank','Accounts, balances, transactions','02 Jun 2026','31 Aug 2026',tg('Withdrawn')]])+'</div><p class="note">Read-only by design: admins can view consent evidence but never extend or recreate a consent on a customer’s behalf.</p>'},
+consents:function(){
+  return head('Consent register','Evidence of what each customer allowed, for how long, and when it was withdrawn.',['GET /admin/consents','GET /admin/consents/{id}'])+
+  '<div class="bar">'+
+    '<input type="search" id="consentSearchInput" placeholder="Search" aria-label="Search">'+
+    '<select id="consentStatusFilter" aria-label="Status">'+
+      '<option value="">All</option>'+
+      '<option value="Active">Active</option>'+
+      '<option value="Expiring">Expiring</option>'+
+      '<option value="Withdrawn">Withdrawn</option>'+
+    '</select>'+
+  '</div>'+
+  '<div class="card">'+
+    '<div id="consentTableContainer">'+
+      '<div style="padding:24px;text-align:center;color:var(--mute);">Querying PostgreSQL database...</div>'+
+    '</div>'+
+  '</div>'+
+  '<p class="note">Read-only by design: admins can view consent evidence but never extend or recreate a consent on a customer’s behalf.</p>';
+},
 
 connections:function(){
   return head('Institutions and connections','Aggregator coverage and sync health per bank or wallet (powered by PostgreSQL).',['GET /api/admin/institutions','POST /api/admin/institutions','PUT /api/admin/institutions/{id}','DELETE /api/admin/institutions/{id}'])+
@@ -1014,6 +1220,8 @@ function show(k){
     InstitutionsApp.init();
   } else if(k==='customers'){
     CustomersApp.init();
+  } else if(k==='consents'){
+    ConsentsApp.init();
   } else if(k==='overview'){
     CustomersApp.loadStats();
     InstitutionsApp.loadStats();

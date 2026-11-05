@@ -9,6 +9,8 @@ from app.schemas.institution import (
     InstitutionResponse,
     InstitutionStatsResponse, 
     InstitutionListResponse,
+    LinkAccountRequest,
+    LinkAccountResponse,
 )   
 from app.schemas.auth import (
     UserRegisterRequest,
@@ -20,6 +22,15 @@ from app.schemas.auth import (
     OTPVerifyResponse,
     LogoutResponse,
 )
+from app.schemas.payment import (
+    BeneficiaryBase,
+    BeneficiaryCreate,
+    BeneficiaryResponse,
+    SendMoneyRequest,
+    SendMoneyResponse,
+    TransferItemResponse,
+    TransferListResponse,
+)
 
 __all__ = [
     "InstitutionBase",
@@ -28,6 +39,8 @@ __all__ = [
     "InstitutionResponse",
     "InstitutionStatsResponse",
     "InstitutionListResponse",
+    "LinkAccountRequest",
+    "LinkAccountResponse",
     "UserRegisterRequest",
     "UserLoginRequest",
     "OTPVerifyRequest",
@@ -36,4 +49,11 @@ __all__ = [
     "LoginResponse",
     "OTPVerifyResponse",
     "LogoutResponse",
+    "BeneficiaryBase",
+    "BeneficiaryCreate",
+    "BeneficiaryResponse",
+    "SendMoneyRequest",
+    "SendMoneyResponse",
+    "TransferItemResponse",
+    "TransferListResponse",
 ]

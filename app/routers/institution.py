@@ -6,10 +6,8 @@ Interacts directly with PostgreSQL via SQLAlchemy.
 from typing import List, Optional
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.orm import Session
-from sqlalchemy import func
 
 from app.core.database import get_db
-from app.models.user import User
 from app.models.institution import Institution
 from app.schemas.institution import (
     InstitutionCreate,
@@ -305,7 +303,7 @@ def show_institutions_list(
     return query.order_by(Institution.name.asc()).offset(skip).limit(limit).all()
 
 
-@public_router.get("/paged", response_model=InstitutionListResponse, summary="Show Institutions List with Total Count")
+@public_router.get("/paged", response_model=InstitutionListResponse, summary="Show Institutions List with Total Count") 
 def show_institutions_list_paged(
     search: Optional[str] = Query(None, description="Search by name, code or provider"),
     status: Optional[str] = Query(None, description="Filter by status"),
@@ -318,7 +316,7 @@ def show_institutions_list_paged(
     Returns institutions list wrapped with total count metadata for pagination.
     """
     seed_default_institutions_if_empty(db)
-    query = db.query(Institution)
+    query = db.query(Institution) 
 
     if is_active is not None:
         query = query.filter(Institution.is_active == is_active)
@@ -357,3 +355,6 @@ def show_institution_detail(institution_id: int, db: Session = Depends(get_db)):
             detail=f"Institution with ID {institution_id} not found.",
         )
     return inst
+
+
+  

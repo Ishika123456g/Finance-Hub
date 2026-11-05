@@ -51,6 +51,33 @@ class LinkRequest(BaseModel):
     email: EmailStr
 
 
+def _normalize_bank_name(name: Optional[str]) -> str:
+    """Normalize bank name for duplicate comparison by removing common suffixes and punctuation."""
+    if not name:
+        return ""
+    cleaned = name.lower()
+    for token in ["(gtbank)", "(uba)", "(fbn)", "bank", "of", "nigeria", "mfb", "plc", "limited", "(", ")", "-", " "]:
+        cleaned = cleaned.replace(token, "")
+    return cleaned.strip()
+
+
+def _is_same_bank(bank1: Optional[str], bank2: Optional[str]) -> bool:
+    """Check if two bank name strings refer to the same banking institution."""
+    if not bank1 or not bank2:
+        return False
+    b1_raw = bank1.strip().lower()
+    b2_raw = bank2.strip().lower()
+    if b1_raw == b2_raw:
+        return True
+    if b1_raw in b2_raw or b2_raw in b1_raw:
+        return True
+    norm1 = _normalize_bank_name(bank1)
+    norm2 = _normalize_bank_name(bank2)
+    if norm1 and norm2 and (norm1 in norm2 or norm2 in norm1 or norm1 == norm2):
+        return True
+    return False
+
+
 # ---------------------------------------------------------------------------
 # Endpoints
 # ---------------------------------------------------------------------------
@@ -130,6 +157,19 @@ def exchange_auth_code(
 
     saved_account = None
     if user:
+        # Check if user already linked this bank or account
+        existing_user_accounts = (
+            db.query(UserBankAccount)
+            .filter(UserBankAccount.user_id == user.id, UserBankAccount.is_active == True)
+            .all()
+        )
+        for acc in existing_user_accounts:
+            if _is_same_bank(acc.bank_name, bank_name) or (account_number and acc.account_number == account_number):
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail=f"You are already linked this bank ({acc.bank_name or bank_name}).",
+                )
+
         # Check if already exists for this mono_account_id
         existing = db.query(UserBankAccount).filter(
             UserBankAccount.mono_account_id == account_id
@@ -179,6 +219,19 @@ def exchange_auth_code(
             "currency": saved_account.currency if saved_account else currency,
         } if saved_account else None,
         "raw": result,
+    }
+
+
+@router.get("/latest-user", response_model=Dict[str, Any])
+def get_latest_registered_user(db: Session = Depends(get_db)):
+    """Return the most recently registered user for testing and WebView fallback."""
+    user = db.query(User).order_by(User.id.desc()).first()
+    if not user:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="No users found.")
+    return {
+        "user_id": user.id,
+        "full_name": user.full_name,
+        "email": user.email,
     }
 
 
@@ -232,6 +285,148 @@ def get_user_linked_bank_accounts(
     }
 
 
+def seed_default_user_bank_accounts_if_empty(db: Session):
+    """Seed initial sample bank accounts for Rahul Kumar matching mobile design if empty."""
+    if db.query(UserBankAccount).count() == 0:
+        user = db.query(User).filter(User.is_active == True).order_by(User.id.asc()).first()
+        if not user:
+            user = User(
+                email="user@1gmail.com",
+                full_name="Rahul Kumar",
+                hashed_password="pw_hash_dummy",
+                role="User",
+                is_active=True,
+                is_verified=True,
+            )
+            db.add(user)
+            db.commit()
+            db.refresh(user)
+
+        sample_accounts = [
+            {
+                "user_id": user.id,
+                "mono_account_id": "mono_sandbox_gtb_6789",
+                "bank_name": "Guaranty Trust Bank (GTBank)",
+                "bank_code": "058",
+                "account_name": user.full_name or "Rahul Kumar",
+                "account_number": "0123456789",
+                "account_type": "savings",
+                "balance": 450000.00,
+                "currency": "NGN",
+                "is_active": True,
+            },
+            {
+                "user_id": user.id,
+                "mono_account_id": "mono_sandbox_acc_3210",
+                "bank_name": "Access Bank",
+                "bank_code": "044",
+                "account_name": user.full_name or "Rahul Kumar",
+                "account_number": "0987653210",
+                "account_type": "savings",
+                "balance": 125000.00,
+                "currency": "NGN",
+                "is_active": True,
+            },
+            {
+                "user_id": user.id,
+                "mono_account_id": "mono_sandbox_uba_9900",
+                "bank_name": "United Bank for Africa (UBA)",
+                "bank_code": "033",
+                "account_name": user.full_name or "Rahul Kumar",
+                "account_number": "0554439900",
+                "account_type": "savings",
+                "balance": 210000.00,
+                "currency": "NGN",
+                "is_active": True,
+            },
+        ]
+        for acc_data in sample_accounts:
+            db.add(UserBankAccount(**acc_data))
+        db.commit()
+
+
+@router.get("/linked-accounts", response_model=Dict[str, Any], summary="List All Linked User Accounts")
+def list_all_linked_user_accounts(
+    user_id: Optional[int] = Query(None, description="Optional user ID to filter accounts for a specific user"),
+    db: Session = Depends(get_db),
+):
+    """
+    Single API for all linked user account list.
+    Powers the Mobile 'Linked accounts' screen and Dashboard cards.
+    - If user_id is provided, returns all linked accounts for that user.
+    - If user_id is omitted, returns all linked user accounts across the system.
+    - Formats balances, currency symbol (₦), initials, and masked account numbers (••6789).
+    """
+    seed_default_user_bank_accounts_if_empty(db)
+
+    query = db.query(UserBankAccount).filter(UserBankAccount.is_active == True)
+    target_user = None
+
+    if user_id is not None:
+        target_user = db.query(User).filter(User.id == user_id).first()
+        if not target_user:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"User with ID {user_id} not found.",
+            )
+        query = query.filter(UserBankAccount.user_id == user_id)
+
+    accounts = query.order_by(UserBankAccount.id.asc()).all()
+    total_balance = sum(acc.balance for acc in accounts)
+    primary_currency = accounts[0].currency if accounts else "NGN"
+
+    formatted_accounts = []
+    for acc in accounts:
+        user_obj = acc.user or (db.query(User).filter(User.id == acc.user_id).first() if acc.user_id else None)
+        holder_name = acc.account_name or (user_obj.full_name if user_obj else "Rahul Kumar")
+        name_parts = holder_name.strip().split()
+        initials = "".join([part[0] for part in name_parts[:2]]).upper() if name_parts else "RK"
+
+        raw_num = acc.account_number or ""
+        last4 = raw_num[-4:] if len(raw_num) >= 4 else raw_num
+        masked_num = f"••{last4}" if last4 else "••••"
+
+        curr_symbol = "₦" if acc.currency == "NGN" else "$"
+        formatted_bal = f"{curr_symbol}{acc.balance:,.2f}"
+
+        formatted_accounts.append({
+            "id": acc.id,
+            "user_id": acc.user_id,
+            "account_holder": holder_name,
+            "initials": initials,
+            "bank_name": acc.bank_name,
+            "bank_code": acc.bank_code,
+            "account_type": acc.account_type or "savings",
+            "account_number": acc.account_number,
+            "masked_account_number": masked_num,
+            "last4": last4,
+            "balance": acc.balance,
+            "currency": acc.currency,
+            "currency_symbol": curr_symbol,
+            "formatted_balance": formatted_bal,
+            "mono_account_id": acc.mono_account_id,
+            "status": "Healthy",
+            "is_active": acc.is_active,
+            "created_at": acc.created_at.isoformat() if acc.created_at else None,
+        })
+
+    response_data: Dict[str, Any] = {
+        "status": "success",
+        "total_accounts": len(formatted_accounts),
+        "total_combined_balance": round(total_balance, 2),
+        "formatted_total_balance": f"₦{total_balance:,.2f}",
+        "currency": primary_currency,
+        "accounts": formatted_accounts,
+    }
+
+    if target_user:
+        response_data["user_id"] = target_user.id
+        response_data["user_name"] = target_user.full_name
+        response_data["email"] = target_user.email
+
+    return response_data
+
+
 @router.post("/users/{user_id}/link-account", response_model=Dict[str, Any])
 def link_account_directly(
     user_id: int,
@@ -248,6 +443,29 @@ def link_account_directly(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=f"User with ID {user_id} not found.",
         )
+
+    # 1. Prevent duplicate bank linking: check if user already linked this bank
+    existing_user_accounts = (
+        db.query(UserBankAccount)
+        .filter(UserBankAccount.user_id == user.id, UserBankAccount.is_active == True)
+        .all()
+    )
+    for acc in existing_user_accounts:
+        if _is_same_bank(acc.bank_name, payload.bank_name) or (
+            payload.account_number and acc.account_number == payload.account_number
+        ):
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"You are already linked this bank ({acc.bank_name or payload.bank_name}).",
+            )
+
+    # 2. Also check if user already has this institution associated
+    for inst in user.institutions:
+        if _is_same_bank(inst.name, payload.bank_name):
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"You are already linked this bank ({inst.name or payload.bank_name}).",
+            )
 
     import uuid
     generated_mono_id = f"sandbox_{uuid.uuid4().hex[:16]}" 

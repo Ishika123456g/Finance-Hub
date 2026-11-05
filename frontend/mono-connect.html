@@ -16,6 +16,7 @@
       --mute: #97a8a4;
       --line: #273533;
       --ok: #6fd48f;
+      --warn: #f0b35a;
       --font: 'IBM Plex Sans', -apple-system, sans-serif;
       --mono: 'JetBrains Mono', monospace;
     }
@@ -40,7 +41,7 @@
     }
 
     .header-box {
-      margin-bottom: 20px;
+      margin-bottom: 16px;
       text-align: left;
     }
 
@@ -54,14 +55,29 @@
       background: rgba(76, 194, 172, 0.15);
       color: var(--brand);
       border: 1px solid var(--brand);
-      margin-bottom: 10px;
+      margin-bottom: 8px;
+    }
+
+    .user-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(111, 212, 143, 0.1);
+      border: 1px solid rgba(111, 212, 143, 0.3);
+      color: var(--ok);
+      font-size: 12px;
+      font-weight: 500;
+      padding: 4px 10px;
+      border-radius: 8px;
+      margin-bottom: 12px;
+      width: fit-content;
     }
 
     h1 {
       font-size: 22px;
       font-weight: 700;
       color: var(--ink);
-      margin-bottom: 6px;
+      margin-bottom: 4px;
     }
 
     p {
@@ -74,6 +90,7 @@
       display: flex;
       flex-direction: column;
       gap: 12px;
+      margin-top: 14px;
       margin-bottom: 24px;
     }
 
@@ -88,12 +105,13 @@
       cursor: pointer;
       transition: all 0.2s ease;
       -webkit-tap-highlight-color: transparent;
+      user-select: none;
     }
 
     .bank-card:hover, .bank-card:active {
       border-color: var(--brand);
       background: var(--surf-hover);
-      transform: translateY(-1px);
+      transform: translateY(-2px);
     }
 
     .bank-icon {
@@ -126,115 +144,23 @@
       color: var(--mute);
     }
 
-    .bank-arrow {
+    .bank-balance-hint {
+      font-size: 11px;
       color: var(--brand);
-      font-size: 18px;
-      font-weight: 600;
+      font-family: var(--mono);
+      margin-top: 3px;
     }
 
-    /* Modal Styling */
-    .modal-overlay {
-      position: fixed;
-      top: 0; left: 0; right: 0; bottom: 0;
-      background: rgba(0, 0, 0, 0.85);
-      backdrop-filter: blur(4px);
-      z-index: 999;
-      display: none;
-      align-items: center;
-      justify-content: center;
-      padding: 16px;
-    }
-
-    .modal-card {
-      width: 100%;
-      max-width: 400px;
-      background: var(--surf);
-      border: 1px solid var(--line);
-      border-radius: 16px;
-      padding: 24px;
-      display: flex;
-      flex-direction: column;
-      box-shadow: 0 16px 40px rgba(0,0,0,0.5);
-    }
-
-    .modal-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 16px;
-      padding-bottom: 12px;
-      border-bottom: 1px solid var(--line);
-    }
-
-    .modal-title {
-      font-size: 16px;
-      font-weight: 600;
-      color: var(--ink);
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-
-    .modal-close {
-      background: none;
-      border: none;
-      color: var(--mute);
-      font-size: 22px;
-      cursor: pointer;
-    }
-
-    .form-group {
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-      margin-bottom: 14px;
-      text-align: left;
-    }
-
-    .form-group label {
+    .bank-action-btn {
+      background: rgba(76, 194, 172, 0.15);
+      border: 1px solid var(--brand);
+      color: var(--brand);
       font-size: 12px;
-      font-weight: 500;
-      color: var(--mute);
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-    }
-
-    .form-input {
-      background: #090e0d;
-      border: 1px solid var(--line);
-      border-radius: 8px;
-      padding: 12px 14px;
-      font-size: 14px;
-      color: var(--ink);
-      font-family: var(--font);
-      outline: none;
-    }
-
-    .form-input:focus {
-      border-color: var(--brand);
-    }
-
-    .btn {
-      width: 100%;
-      background: var(--brand);
-      color: #05221d;
-      font-family: var(--font);
-      font-size: 15px;
       font-weight: 600;
-      padding: 14px;
-      border-radius: 10px;
-      border: none;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      transition: all 0.2s;
-      margin-top: 6px;
-    }
-
-    .btn:hover {
-      background: var(--brandhover);
+      padding: 6px 10px;
+      border-radius: 6px;
+      white-space: nowrap;
+      pointer-events: none;
     }
 
     /* Loading Overlay */
@@ -268,12 +194,14 @@
     .loading-title {
       font-size: 18px;
       font-weight: 600;
-      margin-bottom: 6px;
+      margin-bottom: 8px;
     }
 
     .loading-sub {
       font-size: 13px;
       color: var(--mute);
+      max-width: 300px;
+      line-height: 1.4;
     }
 
     /* Success Screen */
@@ -350,6 +278,29 @@
       font-family: var(--mono);
       font-size: 16px;
     }
+
+    .btn {
+      width: 100%;
+      background: var(--brand);
+      color: #05221d;
+      font-family: var(--font);
+      font-size: 15px;
+      font-weight: 600;
+      padding: 14px;
+      border-radius: 10px;
+      border: none;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: all 0.2s;
+      margin-top: 6px;
+    }
+
+    .btn:hover {
+      background: var(--brandhover);
+    }
   </style>
 </head>
 <body>
@@ -357,124 +308,97 @@
   <!-- STEP 1: Bank Selection List -->
   <div class="container" id="bankListContainer">
     <div class="header-box">
-      <span class="badge">Open Banking</span>
+      <span class="badge">Open Banking Sandbox</span>
+      <div class="user-pill" id="userPill">
+        <span>👤</span>
+        <span id="userPillText">Loading user...</span>
+      </div>
       <h1>Select Your Bank</h1>
-      <p>Choose your bank to authenticate and link with FinanceHub.</p>
+      <p>Tap your bank to connect instantly with FinanceHub.</p>
     </div>
 
     <div class="bank-list">
       <!-- GTBank -->
-      <div class="bank-card" onclick="openAuthModal('Guaranty Trust Bank (GTBank)', '0123456789', 450000.0, '058')">
+      <div class="bank-card" onclick="selectAndLinkBank('Guaranty Trust Bank (GTBank)', '0123456789', 450000.0, '058')">
         <div class="bank-icon">🏦</div>
         <div class="bank-info">
           <div class="bank-name">GTBank</div>
-          <div class="bank-desc">Guaranty Trust Bank · Instant Sync</div>
+          <div class="bank-desc">Guaranty Trust Bank · Sandbox</div>
+          <div class="bank-balance-hint">Balance: ₦ 450,000.00</div>
         </div>
-        <div class="bank-arrow">➔</div>
+        <div class="bank-action-btn">⚡ Connect</div>
       </div>
 
       <!-- Access Bank -->
-      <div class="bank-card" onclick="openAuthModal('Access Bank', '9876543210', 125000.0, '044')">
+      <div class="bank-card" onclick="selectAndLinkBank('Access Bank', '9876543210', 125000.0, '044')">
         <div class="bank-icon">🏦</div>
         <div class="bank-info">
           <div class="bank-name">Access Bank</div>
-          <div class="bank-desc">Access Bank PLC · Real-time Balance</div>
+          <div class="bank-desc">Access Bank PLC · Real-time</div>
+          <div class="bank-balance-hint">Balance: ₦ 125,000.00</div>
         </div>
-        <div class="bank-arrow">➔</div>
+        <div class="bank-action-btn">⚡ Connect</div>
       </div>
 
       <!-- First Bank of Nigeria -->
-      <div class="bank-card" onclick="openAuthModal('First Bank of Nigeria (FBN)', '5544332211', 320000.0, '011')">
+      <div class="bank-card" onclick="selectAndLinkBank('First Bank of Nigeria (FBN)', '5544332211', 320000.0, '011')">
         <div class="bank-icon">🏦</div>
         <div class="bank-info">
           <div class="bank-name">FirstBank</div>
-          <div class="bank-desc">First Bank of Nigeria · Verified</div>
+          <div class="bank-desc">First Bank of Nigeria</div>
+          <div class="bank-balance-hint">Balance: ₦ 320,000.00</div>
         </div>
-        <div class="bank-arrow">➔</div>
+        <div class="bank-action-btn">⚡ Connect</div>
       </div>
 
       <!-- Zenith Bank -->
-      <div class="bank-card" onclick="openAuthModal('Zenith Bank', '3322114455', 780000.0, '057')">
+      <div class="bank-card" onclick="selectAndLinkBank('Zenith Bank', '3322114455', 780000.0, '057')">
         <div class="bank-icon">🏦</div>
         <div class="bank-info">
           <div class="bank-name">Zenith Bank</div>
-          <div class="bank-desc">Zenith Bank PLC · Live Connected</div>
+          <div class="bank-desc">Zenith Bank PLC</div>
+          <div class="bank-balance-hint">Balance: ₦ 780,000.00</div>
         </div>
-        <div class="bank-arrow">➔</div>
+        <div class="bank-action-btn">⚡ Connect</div>
       </div>
 
       <!-- UBA -->
-      <div class="bank-card" onclick="openAuthModal('United Bank for Africa (UBA)', '6677889900', 210000.0, '033')">
+      <div class="bank-card" onclick="selectAndLinkBank('United Bank for Africa (UBA)', '6677889900', 210000.0, '033')">
         <div class="bank-icon">🏦</div>
         <div class="bank-info">
           <div class="bank-name">UBA</div>
           <div class="bank-desc">United Bank for Africa</div>
+          <div class="bank-balance-hint">Balance: ₦ 210,000.00</div>
         </div>
-        <div class="bank-arrow">➔</div>
+        <div class="bank-action-btn">⚡ Connect</div>
       </div>
 
       <!-- Stanbic IBTC -->
-      <div class="bank-card" onclick="openAuthModal('Stanbic IBTC Bank', '8899001122', 95000.0, '221')">
+      <div class="bank-card" onclick="selectAndLinkBank('Stanbic IBTC Bank', '8899001122', 95000.0, '221')">
         <div class="bank-icon">🏦</div>
         <div class="bank-info">
           <div class="bank-name">Stanbic IBTC</div>
           <div class="bank-desc">Stanbic IBTC Bank</div>
+          <div class="bank-balance-hint">Balance: ₦ 95,000.00</div>
         </div>
-        <div class="bank-arrow">➔</div>
+        <div class="bank-action-btn">⚡ Connect</div>
       </div>
     </div>
   </div>
 
-  <!-- STEP 2: Bank Login Auth Modal -->
-  <div class="modal-overlay" id="authModal">
-    <div class="modal-card">
-      <div class="modal-header">
-        <div class="modal-title" id="authModalTitle">
-          <span>🏦</span> <span id="authBankName">GTBank Login</span>
-        </div>
-        <button class="modal-close" onclick="closeAuthModal()">&times;</button>
-      </div>
-
-      <p style="font-size: 13px; color: var(--mute); margin-bottom: 16px; text-align: left;">
-        Enter your online banking credentials to authorize and link your account (Mono Sandbox).
-      </p>
-
-      <form id="bankLoginForm" onsubmit="handleBankAuthSubmit(event)">
-        <div class="form-group">
-          <label>Bank User ID / Account Number</label>
-          <input type="text" id="bankUserNumber" class="form-input" value="0123456789" required>
-        </div>
-
-        <div class="form-group">
-          <label>Internet Banking PIN / Password</label>
-          <input type="password" id="bankPassword" class="form-input" value="123456" required>
-        </div>
-
-        <div class="form-group">
-          <label>One-Time Password (OTP)</label>
-          <input type="text" id="bankOtp" class="form-input" value="882190" required>
-        </div>
-
-        <button type="submit" class="btn">
-          <span>🔐 Authorize & Link Bank</span>
-        </button>
-      </form>
-    </div>
-  </div>
-
-  <!-- STEP 3: Verifying Loader -->
+  <!-- STEP 2: Loading Overlay -->
   <div class="loading-overlay" id="loadingOverlay">
     <div class="spinner"></div>
-    <div class="loading-title" id="loadingTitle">Authenticating with Bank...</div>
-    <div class="loading-sub" id="loadingSub">Verifying credentials & saving to PostgreSQL...</div>
+    <div class="loading-title" id="loadingTitle">Connecting to Bank...</div>
+    <div class="loading-sub" id="loadingSub">Saving account and balance to PostgreSQL...</div>
   </div>
 
-  <!-- STEP 4: Success Message Screen -->
+  <!-- STEP 3: Success Screen -->
   <div class="success-container" id="successContainer">
     <div class="success-box">
       <div class="success-icon-wrap">✓</div>
       <h1 style="color: var(--ok); font-size: 22px; margin-bottom: 6px;">Bank Linked Successfully!</h1>
-      <p style="font-size: 14px; color: var(--mute);">Your financial institution has been authorized and connected to your account.</p>
+      <p style="font-size: 14px; color: var(--mute);">Your financial institution has been authorized and linked to your dashboard.</p>
 
       <div class="details-card">
         <div class="details-row">
@@ -502,89 +426,115 @@
   </div>
 
   <script>
-    // Read user_id from query params (?user_id=11)
+    // 1. Resolve User ID from URL query params or fallback to latest registered user
     const urlParams = new URLSearchParams(window.location.search);
-    const userId = urlParams.get("user_id") || urlParams.get("userId") || "11";
+    let userId = urlParams.get("user_id") || urlParams.get("userId");
+    let userName = "";
 
-    let selectedBank = {
-      name: "Guaranty Trust Bank (GTBank)",
-      accountNumber: "0123456789",
-      balance: 450000.0,
-      bankCode: "058"
-    };
+    async function initUser() {
+      if (!userId) {
+        try {
+          const res = await fetch("/api/mono/latest-user");
+          if (res.ok) {
+            const data = await res.json();
+            userId = String(data.user_id);
+            userName = data.full_name || data.email;
+          }
+        } catch (e) {
+          console.warn("Could not fetch latest user, defaulting to 20:", e);
+          userId = "20";
+        }
+      }
+      
+      const userText = userName ? `${userName} (ID #${userId})` : `User ID: #${userId}`;
+      document.getElementById("userPillText").innerText = userText;
+    }
+
+    initUser();
 
     let redirectDeepLink = "";
+    let isSubmitting = false;
 
-    function openAuthModal(bankName, accNumber, balance, bankCode) {
-      selectedBank = { name: bankName, accountNumber: accNumber, balance: balance, bankCode: bankCode };
-      document.getElementById("authBankName").innerText = bankName + " Auth";
-      document.getElementById("bankUserNumber").value = accNumber;
-      document.getElementById("authModal").style.display = "flex";
-    }
+    // Direct 1-Tap Bank Selection & Linking
+    async function selectAndLinkBank(bankName, accNumber, balance, bankCode) {
+      if (isSubmitting) return;
+      isSubmitting = true;
 
-    function closeAuthModal() {
-      document.getElementById("authModal").style.display = "none";
-    }
+      // Make sure we have a userId
+      if (!userId) {
+        await initUser();
+      }
 
-    async function handleBankAuthSubmit(e) {
-      e.preventDefault();
-      closeAuthModal();
-
-      // Show verifying loader
       const loader = document.getElementById("loadingOverlay");
       loader.style.display = "flex";
-      document.getElementById("loadingTitle").innerText = "Authorizing " + selectedBank.name + "...";
-      document.getElementById("loadingSub").innerText = "Saving account into PostgreSQL for User ID: " + userId;
+      document.getElementById("loadingTitle").innerText = "Connecting to " + bankName + "...";
+      document.getElementById("loadingSub").innerText = `Linking account to User #${userId} and saving to PostgreSQL...`;
 
       try {
-        // Save to PostgreSQL via backend API
+        const payload = {
+          bank_name: bankName,
+          account_number: accNumber,
+          balance: balance,
+          currency: "NGN",
+          account_type: "savings"
+        };
+
         const res = await fetch(`/api/mono/users/${encodeURIComponent(userId)}/link-account`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            bank_name: selectedBank.name,
-            account_number: selectedBank.accountNumber,
-            balance: selectedBank.balance,
-            currency: "NGN",
-            account_type: "savings"
-          })
+          body: JSON.stringify(payload)
         });
 
-        const data = await res.json();
-        console.log("Database save response:", data);
+        if (!res.ok) {
+          let errorMsg = "You are already linked this bank.";
+          try {
+            const errJson = await res.json();
+            errorMsg = errJson.detail || errJson.message || errorMsg;
+          } catch (e) {
+            errorMsg = (await res.text()) || errorMsg;
+          }
+          throw new Error(errorMsg);
+        }
 
-        // Hide loader & bank list, show Success Screen
+        const data = await res.json();
+        console.log("Bank linked successfully:", data);
+
+        // Hide loader & bank list, show Success Card
         loader.style.display = "none";
         document.getElementById("bankListContainer").style.display = "none";
         document.getElementById("successContainer").style.display = "flex";
 
-        // Fill Details in Success Card
-        document.getElementById("dispBankName").innerText = selectedBank.name;
-        document.getElementById("dispAccNum").innerText = selectedBank.accountNumber;
-        document.getElementById("dispBalance").innerText = "₦ " + selectedBank.balance.toLocaleString("en-NG", { minimumFractionDigits: 2 });
+        // Update Success Card details
+        document.getElementById("dispBankName").innerText = bankName;
+        document.getElementById("dispAccNum").innerText = accNumber;
+        document.getElementById("dispBalance").innerText = "₦ " + balance.toLocaleString("en-NG", { minimumFractionDigits: 2 });
 
-        // Build Deep Link URL for Android
+        // Deep Link URL for Android
         const accountId = (data.account && data.account.mono_account_id) || "sandbox_acc_01";
-        redirectDeepLink = `financehub://bank-success?user_id=${encodeURIComponent(userId)}&account_id=${encodeURIComponent(accountId)}&bank_name=${encodeURIComponent(selectedBank.name)}`;
+        redirectDeepLink = `financehub://bank-success?user_id=${encodeURIComponent(userId)}&account_id=${encodeURIComponent(accountId)}&bank_name=${encodeURIComponent(bankName)}`;
 
-        // Button Click to go to Dashboard
+        // Button click
         document.getElementById("goToDashboardBtn").onclick = () => {
-          navigateDashboard();
+          navigateDashboard(bankName);
         };
 
+        // Notify Android bridge immediately
+        if (window.AndroidBridge && typeof window.AndroidBridge.onBankLinkSuccess === "function") {
+          window.AndroidBridge.onBankLinkSuccess(userId, bankName);
+        }
+
       } catch (err) {
-        console.error("Auth error:", err);
+        console.error("Link error:", err);
         loader.style.display = "none";
-        alert("Failed to link bank: " + err.message);
+        isSubmitting = false;
+        alert(err.message);
       }
     }
 
-    function navigateDashboard() {
-      // 1. Trigger Android JavaScript Bridge if available
+    function navigateDashboard(bankName) {
       if (window.AndroidBridge && typeof window.AndroidBridge.onBankLinkSuccess === "function") {
-        window.AndroidBridge.onBankLinkSuccess(userId, selectedBank.name);
+        window.AndroidBridge.onBankLinkSuccess(userId, bankName || "Connected Bank");
       }
-      // 2. Trigger Custom URL Scheme
       window.location.href = redirectDeepLink;
     }
   </script>

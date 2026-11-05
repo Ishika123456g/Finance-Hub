@@ -30,8 +30,8 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 ) 
-
-# Mount static frontend directory if it exists
+    
+# Mount static frontend directory if it exists 
 if FRONTEND_DIR.exists(): 
     app.mount("/static", StaticFiles(directory=str(FRONTEND_DIR)), name="static")
     if (FRONTEND_DIR / "assets").exists():
@@ -51,13 +51,13 @@ def root():
         return FileResponse(str(login_path))
     return RedirectResponse(url="/docs") 
 
-
+    
 @app.get("/login", include_in_schema=False) 
 @app.get("/login.html", include_in_schema=False)
 def serve_login():
     """Serves the Admin Staff Login template."""
-    return FileResponse(str(FRONTEND_DIR / "login.html"))
-
+    return FileResponse(str(FRONTEND_DIR / "login.html")) 
+    
 
 @app.get("/dashboard", include_in_schema=False)
 @app.get("/dashboard.html", include_in_schema=False)
@@ -73,7 +73,7 @@ def serve_admin():
     return FileResponse(str(FRONTEND_DIR / "admin.html"))
 
 
-@app.get("/customers", include_in_schema=False)
+@app.get("/customers", include_in_schema=False) 
 @app.get("/customer", include_in_schema=False)
 @app.get("/customer.html", include_in_schema=False)
 @app.get("/customers.html", include_in_schema=False) 
@@ -82,51 +82,67 @@ def serve_customers():
     return FileResponse(str(FRONTEND_DIR / "customer.html"))
 
 
+@app.get("/consents", include_in_schema=False)
+@app.get("/consent", include_in_schema=False)
+@app.get("/consent.html", include_in_schema=False)
+@app.get("/consents.html", include_in_schema=False)
+def serve_consents():
+    """Serves the Consent Register page."""
+    return FileResponse(str(FRONTEND_DIR / "consent.html"))
+
+
 @app.get("/institutions", include_in_schema=False)
 @app.get("/institutional", include_in_schema=False)
-@app.get("/institutional.html", include_in_schema=False)
+@app.get("/institutional.html", include_in_schema=False) 
 @app.get("/institutions.html", include_in_schema=False)
 def serve_institutions():
-    """Serves the Institutions & Connections page."""
+    """Serves the Institutions & Connections page.""" 
     return FileResponse(str(FRONTEND_DIR / "institutional.html"))
-
+    
 
 @app.get("/mono-demo", include_in_schema=False)
-@app.get("/mono-demo.html", include_in_schema=False)
+@app.get("/mono-demo.html", include_in_schema=False) 
 def serve_mono_demo():
     """Serves the Interactive Mono Sandbox Demo page."""
-    return FileResponse(str(FRONTEND_DIR / "mono-demo.html"))
+    return FileResponse(str(FRONTEND_DIR / "mono-demo.html")) 
 
 
 @app.get("/mono-connect", include_in_schema=False)
 @app.get("/mono-connect.html", include_in_schema=False)
-def serve_mono_connect():
+def serve_mono_connect(): 
     """Serves the Mobile WebView Mono Bank Connect page."""
     return FileResponse(str(FRONTEND_DIR / "mono-connect.html"))
 
 
 
-
+ 
 from app.core.database import Base, engine
-from app.routers import (
+from app.routers import ( 
     auth_router,
     institution_router,
-    public_institution_router,
+    public_institution_router, 
     customer_router,
     public_customer_router,
+    consent_router,
+    public_consent_router,
     user_institution_router,
     mono_router,
-)
-
+    payment_router,
+)   
+    
 
 # Include Routers
-app.include_router(auth_router) 
+app.include_router(auth_router)  
 app.include_router(institution_router) 
 app.include_router(public_institution_router)
 app.include_router(customer_router)
 app.include_router(public_customer_router)
-app.include_router(user_institution_router) 
+app.include_router(consent_router)
+app.include_router(public_consent_router)
+app.include_router(user_institution_router)  
 app.include_router(mono_router)
+app.include_router(payment_router)
+
 
 
 
@@ -134,7 +150,7 @@ app.include_router(mono_router)
 def startup_event():
     """Ensure database tables are created on app startup."""
     try:
-        Base.metadata.create_all(bind=engine)
+        Base.metadata.create_all(bind=engine) 
     except Exception as e:
         print(f"Startup DB init notice: {e}")
 
@@ -143,11 +159,11 @@ def startup_event():
 # System Endpoints
 # ---------------------------------------------------------------------------
 @app.get("/health", tags=["System"])
-def health_check():
+def health_check():  
     """
     Service health check endpoint.
     """
-    return {
+    return { 
         "status": "healthy",
         "service": "FinanceHub API",
         "version": "1.0.0",

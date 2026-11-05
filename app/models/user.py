@@ -11,7 +11,7 @@ from app.core.database import Base
 
 class User(Base):
     __tablename__ = "users"
-
+    
     id = Column(Integer, primary_key=True, index=True, autoincrement=True)
     email = Column(String(255), unique=True, index=True, nullable=False)
     phone_number = Column(String(50), nullable=True, index=True)
@@ -33,6 +33,20 @@ class User(Base):
     # One-to-many relationship with linked bank accounts via Mono
     bank_accounts = relationship(
         "UserBankAccount",
+        back_populates="user",
+        cascade="all, delete-orphan",
+    )
+
+    # One-to-many relationship with saved beneficiaries
+    beneficiaries = relationship(
+        "Beneficiary",
+        back_populates="user",
+        cascade="all, delete-orphan",
+    )
+
+    # One-to-many relationship with transfers
+    transfers = relationship(
+        "Transfer",
         back_populates="user",
         cascade="all, delete-orphan",
     )

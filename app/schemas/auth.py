@@ -9,10 +9,10 @@ from pydantic import BaseModel, ConfigDict, EmailStr, Field, field_validator
 
 class UserRegisterRequest(BaseModel):
     full_name: str = Field(..., min_length=2, max_length=150, description="Customer full name", example="Adewale Afolabi")
-    mobile_number: str = Field(..., min_length=7, max_length=30, description="Customer mobile number", example="+2348012345678")
+    mobile_number: str = Field(..., min_length=7, max_length=30,   description="Customer mobile number", example="+2348012345678")
     email: EmailStr = Field(..., description="Customer valid email address", example="adewale@example.com")
     password: str = Field(..., min_length=6, max_length=128, description="Account password", example="SecretPass123!")
-    agree_terms: bool = Field(True, description="Consent to Terms and Privacy Notice")
+    agree_terms: bool = Field(True, description="Consent to Terms and Privacy Notice") 
 
     @field_validator("agree_terms")
     def validate_terms(cls, v: bool) -> bool:
@@ -33,7 +33,7 @@ class OTPVerifyRequest(BaseModel):
 
 
 class UserProfileResponse(BaseModel):
-    id: int
+    id: int 
     full_name: Optional[str] = None
     email: str
     mobile_number: Optional[str] = None
@@ -47,9 +47,9 @@ class RegisterResponse(BaseModel):
     message: str
     email: str
     mobile_number: str
-    otp_code: Optional[str] = None  # Included for immediate development / testing convenience
+    otp_code: Optional[str] = None  # Included for immediate development / testing convenience 
 
-
+ 
 class LoginResponse(BaseModel):
     message: str
     email: str
@@ -57,7 +57,7 @@ class LoginResponse(BaseModel):
     otp_code: Optional[str] = None  # Included for dev / testing convenience
     access_token: Optional[str] = None
     token_type: Optional[str] = "bearer"
-    user: Optional[UserProfileResponse] = None
+    user: Optional[UserProfileResponse] = None 
 
 
 class OTPVerifyResponse(BaseModel):

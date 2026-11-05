@@ -13,7 +13,7 @@ pip-delete-this-directory.txt
 env/
 venv/
 ENV/
-env.bak/
+env.bak/   
 # Pytest cache
 .pytest_cache/
 # mypy
