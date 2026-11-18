@@ -9,13 +9,14 @@ Authentication Router providing 4 core APIs for the mobile & web Sign up / Login
 import random
 from datetime import datetime, timedelta, timezone
 from typing import Optional
-from fastapi import APIRouter, Depends, Header, HTTPException, status
+from fastapi import APIRouter, BackgroundTasks, Depends, Header, HTTPException, status
 from sqlalchemy.orm import Session
 from sqlalchemy import func
 
 from app.core.database import get_db
 from app.core.security import get_password_hash, verify_password, create_access_token
 from app.models.user import User
+from app.services.email_service import send_otp_email
 from app.schemas.auth import (
     UserRegisterRequest,
     UserLoginRequest,
@@ -41,12 +42,16 @@ def generate_numeric_otp(length: int = 6) -> str:
 # 1. API: User Register (Sign Up)
 # ---------------------------------------------------------------------------
 @router.post("/register", response_model=RegisterResponse, status_code=status.HTTP_201_CREATED, summary="1. User Registration")
-def register_user(payload: UserRegisterRequest, db: Session = Depends(get_db)):
+def register_user(
+    payload: UserRegisterRequest,
+    background_tasks: BackgroundTasks,
+    db: Session = Depends(get_db),
+):
     """
     Registers a new end-user from the mobile/web Sign up screen.
     - Captures Full name, Mobile number, Email address, Password, and Terms Agreement.
     - Hashes password using bcrypt.
-    - Generates a 6-digit OTP for phone/email verification and stores it in PostgreSQL.
+    - Generates a 6-digit OTP, stores it in PostgreSQL, and emails it to the user.
     """
     email_clean = payload.email.strip().lower()
     phone_clean = payload.mobile_number.strip()
@@ -80,7 +85,7 @@ def register_user(payload: UserRegisterRequest, db: Session = Depends(get_db)):
         role="User",
         is_active=True,
         is_verified=False,
-        mfa_type="SMS",
+        mfa_type="EMAIL",
         otp_code=otp,
         otp_expires_at=expires_at,
     )
@@ -89,8 +94,17 @@ def register_user(payload: UserRegisterRequest, db: Session = Depends(get_db)):
     db.commit()
     db.refresh(new_user)
 
+    # Dispatch OTP email in background
+    background_tasks.add_task(
+        send_otp_email,
+        to_email=new_user.email,
+        otp_code=otp,
+        user_name=new_user.full_name,
+        flow_type="Registration",
+    )
+
     return RegisterResponse(
-        message=f"Registration successful. A 6-digit OTP has been sent to your mobile number {phone_clean}.",
+        message=f"Registration successful. A 6-digit OTP has been sent to your email {email_clean}.",
         email=new_user.email,
         mobile_number=new_user.phone_number,
         otp_code=otp,  # Returned for easy developer testing
@@ -101,11 +115,15 @@ def register_user(payload: UserRegisterRequest, db: Session = Depends(get_db)):
 # 2. API: User Login
 # ---------------------------------------------------------------------------
 @router.post("/login", response_model=LoginResponse, summary="2. User Login")
-def login_user(payload: UserLoginRequest, db: Session = Depends(get_db)):
+def login_user(
+    payload: UserLoginRequest,
+    background_tasks: BackgroundTasks,
+    db: Session = Depends(get_db),
+):
     """
     Authenticates registered user credentials.
     - Verifies email (or mobile number) and password.
-    - Generates a fresh 6-digit OTP sent to the user's mobile number.
+    - Generates a fresh 6-digit OTP sent to the user's email address.
     - Direct access token issued for verified staff/super-admins.
     """
     identifier = (payload.email or "").strip()
@@ -172,8 +190,17 @@ def login_user(payload: UserLoginRequest, db: Session = Depends(get_db)):
     user.otp_expires_at = datetime.now(timezone.utc) + timedelta(minutes=OTP_EXPIRATION_MINUTES)
     db.commit()
 
+    # Dispatch OTP email in background
+    background_tasks.add_task(
+        send_otp_email,
+        to_email=user.email,
+        otp_code=otp,
+        user_name=user.full_name or "Customer",
+        flow_type="Login",
+    )
+
     return LoginResponse(
-        message=f"Credentials verified. A 6-digit OTP has been sent to your registered mobile number {user.phone_number or user.email}.",
+        message=f"Credentials verified. A 6-digit OTP has been sent to your email {user.email}.",
         email=user.email,
         requires_otp=True,
         otp_code=otp,  # Returned for easy testing
@@ -225,7 +252,7 @@ def verify_otp(payload: OTPVerifyRequest, db: Session = Depends(get_db)):
     if user.otp_code.strip() != payload.otp_code.strip():
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Invalid OTP code. Please check your SMS and try again.",
+            detail="Invalid OTP code. Please check your email and try again.",
         )
 
     # Successful verification - clear OTP and activate

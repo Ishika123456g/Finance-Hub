@@ -3,7 +3,7 @@ Core application settings and environment configuration using Pydantic Settings.
 Configures PostgreSQL connection parameters, JWT secrets, and service metadata.
 """
 
-from typing import List, Union
+from typing import List, Optional, Union
 from pydantic import AnyHttpUrl, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
@@ -38,6 +38,19 @@ class Settings(BaseSettings):
     MONO_PUBLIC_KEY: str = "test_pk_jqiidgnba6z0ripblsbd"
     MONO_SECRET_KEY: str = "test_sk_iyxs2lgi8s76w5bzb6ts"
     MONO_BASE_URL: str = "https://api.withmono.com"
+
+    # Email / SMTP Configuration
+    EMAIL_HOST: str = "smtp.gmail.com"
+    EMAIL_PORT: int = 587
+    EMAIL_HOST_USER: Optional[str] = "yrstogi@gmail.com"
+    EMAIL_HOST_PASSWORD: Optional[str] = None
+    EMAIL_USE_TLS: bool = True
+    EMAILS_FROM_NAME: str = "FinanceHub Security"
+
+    # Session Configuration
+    SESSION_EXPIRE_AT_BROWSER_CLOSE: bool = True
+    SESSION_COOKIE_AGE: int = 21600
+    SESSION_SAVE_EVERY_REQUEST: bool = True
 
     # CORS
     CORS_ORIGINS: Union[List[str], str] = ["http://localhost:8000", "http://127.0.0.1:8000"]

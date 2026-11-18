@@ -41,8 +41,8 @@ class ExchangeCodeRequest(BaseModel):
 class ManualLinkRequest(BaseModel):
     bank_name: str = "Guaranty Trust Bank (GTBank)"
     account_number: str = "0123456789"
-    account_name: Optional[str] = "Rahul Kumar"
-    balance: float = 450000.00
+    account_name: Optional[str] = None
+    balance: Optional[float] = None
     currency: str = "NGN"
     account_type: str = "savings"
 
@@ -50,6 +50,18 @@ class ManualLinkRequest(BaseModel):
 class LinkRequest(BaseModel):
     name: str
     email: EmailStr
+
+
+DEFAULT_DEMO_BALANCES: Dict[str, float] = {
+    "gtb": 450000.00,
+    "guaranty": 450000.00,
+    "access": 125000.00,
+    "fbn": 320000.00,
+    "first": 320000.00,
+    "zenith": 780000.00,
+    "uba": 210000.00,
+    "stanbic": 95000.00,
+}
 
 
 def _normalize_bank_name(name: Optional[str]) -> str:
@@ -60,6 +72,15 @@ def _normalize_bank_name(name: Optional[str]) -> str:
     for token in ["(gtbank)", "(uba)", "(fbn)", "bank", "of", "nigeria", "mfb", "plc", "limited", "(", ")", "-", " "]:
         cleaned = cleaned.replace(token, "")
     return cleaned.strip()
+
+
+def get_demo_balance_for_bank(bank_name: Optional[str]) -> float:
+    """Return a realistic demo balance for simulated accounts."""
+    key = _normalize_bank_name(bank_name)
+    for k, val in DEFAULT_DEMO_BALANCES.items():
+        if k in key:
+            return val
+    return 150000.00
 
 
 def _is_same_bank(bank1: Optional[str], bank2: Optional[str]) -> bool:
@@ -327,21 +348,11 @@ def get_user_linked_bank_accounts(
 
 
 def seed_default_user_bank_accounts_if_empty(db: Session):
-    """Seed initial sample bank accounts for Rahul Kumar matching mobile design if empty."""
+    """Seed initial sample bank accounts only if an active user exists in DB."""
     if db.query(UserBankAccount).count() == 0:
         user = db.query(User).filter(User.is_active == True).order_by(User.id.asc()).first()
         if not user:
-            user = User(
-                email="user@1gmail.com",
-                full_name="Rahul Kumar",
-                hashed_password="pw_hash_dummy",
-                role="User",
-                is_active=True,
-                is_verified=True,
-            )
-            db.add(user)
-            db.commit()
-            db.refresh(user)
+            return
 
         sample_accounts = [
             {
@@ -549,6 +560,12 @@ def link_account_directly(
     import uuid
     generated_mono_id = f"sandbox_{uuid.uuid4().hex[:16]}" 
 
+    initial_balance = (
+        payload.balance
+        if payload.balance is not None and payload.balance > 0
+        else get_demo_balance_for_bank(payload.bank_name)
+    )
+
     new_acc = UserBankAccount(
         user_id=user.id,
         mono_account_id=generated_mono_id,
@@ -558,7 +575,7 @@ def link_account_directly(
         bank_code="058", 
         account_type=payload.account_type,
         currency=payload.currency,
-        balance=payload.balance,
+        balance=initial_balance,
         is_active=True,
     )
     db.add(new_acc)

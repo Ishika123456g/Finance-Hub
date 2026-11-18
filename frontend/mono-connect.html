@@ -3,18 +3,18 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Connect Bank · FinanceHub</title>
+  <title>Link Account · FinanceHub</title>
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
   <style>
     :root {
       --bg: #0e1514;
       --surf: #162120;
-      --surf-hover: #1e2e2b;
+      --surf-hover: #1c2b29;
       --brand: #4cc2ac;
-      --brandhover: #5bd4bd;
+      --brand-hover: #5bd4bd;
       --ink: #e6efed;
       --mute: #97a8a4;
-      --line: #273533;
+      --line: #223230;
       --ok: #6fd48f;
       --warn: #f0b35a;
       --font: 'IBM Plex Sans', -apple-system, sans-serif;
@@ -30,7 +30,8 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      padding: 20px 16px;
+      padding: 16px;
+      -webkit-font-smoothing: antialiased;
     }
 
     .container {
@@ -41,21 +42,30 @@
     }
 
     .header-box {
-      margin-bottom: 16px;
+      margin-bottom: 18px;
       text-align: left;
     }
 
-    .badge {
-      display: inline-block;
+    .pill-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-bottom: 12px;
+    }
+
+    .badge-sandbox {
+      display: inline-flex;
+      align-items: center;
       font-size: 11px;
       font-weight: 600;
+      letter-spacing: 0.5px;
       text-transform: uppercase;
-      padding: 3px 8px;
+      padding: 4px 10px;
       border-radius: 99px;
-      background: rgba(76, 194, 172, 0.15);
+      background: rgba(76, 194, 172, 0.12);
       color: var(--brand);
-      border: 1px solid var(--brand);
-      margin-bottom: 8px;
+      border: 1px solid rgba(76, 194, 172, 0.4);
     }
 
     .user-pill {
@@ -63,14 +73,12 @@
       align-items: center;
       gap: 6px;
       background: rgba(111, 212, 143, 0.1);
-      border: 1px solid rgba(111, 212, 143, 0.3);
+      border: 1px solid rgba(111, 212, 143, 0.35);
       color: var(--ok);
       font-size: 12px;
       font-weight: 500;
       padding: 4px 10px;
       border-radius: 8px;
-      margin-bottom: 12px;
-      width: fit-content;
     }
 
     h1 {
@@ -78,12 +86,13 @@
       font-weight: 700;
       color: var(--ink);
       margin-bottom: 4px;
+      letter-spacing: -0.3px;
     }
 
-    p {
+    p.subtitle {
       font-size: 13px;
       color: var(--mute);
-      line-height: 1.4;
+      line-height: 1.45;
     }
 
     .bank-list {
@@ -97,7 +106,7 @@
     .bank-card {
       background: var(--surf);
       border: 1px solid var(--line);
-      border-radius: 12px;
+      border-radius: 14px;
       padding: 14px 16px;
       display: flex;
       align-items: center;
@@ -106,30 +115,44 @@
       transition: all 0.2s ease;
       -webkit-tap-highlight-color: transparent;
       user-select: none;
+      position: relative;
     }
 
-    .bank-card:hover, .bank-card:active {
+    .bank-card:not(.connected):hover,
+    .bank-card:not(.connected):active {
       border-color: var(--brand);
       background: var(--surf-hover);
-      transform: translateY(-2px);
+      transform: translateY(-1px);
+    }
+
+    .bank-card.connected {
+      border-color: rgba(111, 212, 143, 0.3);
+      cursor: default;
     }
 
     .bank-icon {
       width: 44px;
       height: 44px;
-      border-radius: 10px;
-      background: rgba(76, 194, 172, 0.1);
+      border-radius: 12px;
+      background: rgba(76, 194, 172, 0.08);
       border: 1px solid var(--line);
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 22px;
       flex-shrink: 0;
+      color: var(--brand);
+    }
+
+    .bank-card.connected .bank-icon {
+      background: rgba(111, 212, 143, 0.1);
+      border-color: rgba(111, 212, 143, 0.25);
+      color: var(--ok);
     }
 
     .bank-info {
       flex: 1;
       text-align: left;
+      min-width: 0;
     }
 
     .bank-name {
@@ -144,23 +167,70 @@
       color: var(--mute);
     }
 
+    /* Balance hint - ONLY shown for connected banks */
     .bank-balance-hint {
-      font-size: 11px;
+      font-size: 12px;
       color: var(--brand);
       font-family: var(--mono);
-      margin-top: 3px;
+      font-weight: 500;
+      margin-top: 4px;
+      letter-spacing: -0.2px;
     }
 
     .bank-action-btn {
-      background: rgba(76, 194, 172, 0.15);
-      border: 1px solid var(--brand);
-      color: var(--brand);
       font-size: 12px;
       font-weight: 600;
-      padding: 6px 10px;
-      border-radius: 6px;
+      padding: 7px 12px;
+      border-radius: 8px;
       white-space: nowrap;
+      transition: all 0.2s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      flex-shrink: 0;
+    }
+
+    .bank-action-btn.connect-btn {
+      background: rgba(76, 194, 172, 0.12);
+      border: 1px solid var(--brand);
+      color: var(--brand);
+    }
+
+    .bank-action-btn.connect-btn .bolt-icon {
+      color: #f7ba3e;
+      font-size: 13px;
+      line-height: 1;
+    }
+
+    .bank-card:not(.connected):hover .bank-action-btn.connect-btn {
+      background: var(--brand);
+      color: #05221d;
+    }
+
+    .bank-card:not(.connected):hover .bank-action-btn.connect-btn .bolt-icon {
+      color: #05221d;
+    }
+
+    .bank-action-btn.connected-badge {
+      background: rgba(111, 212, 143, 0.15);
+      border: 1px solid var(--ok);
+      color: var(--ok);
       pointer-events: none;
+    }
+
+    /* Skeleton Loading placeholder */
+    .skeleton-box {
+      height: 72px;
+      border-radius: 14px;
+      background: linear-gradient(90deg, #162120 25%, #1e2e2b 50%, #162120 75%);
+      background-size: 200% 100%;
+      animation: shimmer 1.5s infinite;
+      border: 1px solid var(--line);
+    }
+
+    @keyframes shimmer {
+      0% { background-position: 200% 0; }
+      100% { background-position: -200% 0; }
     }
 
     /* Loading Overlay */
@@ -178,8 +248,8 @@
     }
 
     .spinner {
-      width: 48px;
-      height: 48px;
+      width: 46px;
+      height: 46px;
       border: 3px solid rgba(76, 194, 172, 0.2);
       border-top-color: var(--brand);
       border-radius: 50%;
@@ -195,6 +265,7 @@
       font-size: 18px;
       font-weight: 600;
       margin-bottom: 8px;
+      color: var(--ink);
     }
 
     .loading-sub {
@@ -212,7 +283,7 @@
       flex-direction: column;
       align-items: center;
       text-align: center;
-      padding: 24px 0;
+      padding: 12px 0 24px;
     }
 
     .success-box {
@@ -220,7 +291,7 @@
       background: var(--surf);
       border: 1px solid var(--line);
       border-radius: 20px;
-      padding: 32px 24px;
+      padding: 28px 20px;
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -228,8 +299,8 @@
     }
 
     .success-icon-wrap {
-      width: 76px;
-      height: 76px;
+      width: 70px;
+      height: 70px;
       border-radius: 50%;
       background: rgba(111, 212, 143, 0.15);
       border: 2px solid var(--ok);
@@ -237,8 +308,8 @@
       align-items: center;
       justify-content: center;
       color: var(--ok);
-      font-size: 38px;
-      margin-bottom: 20px;
+      font-size: 34px;
+      margin-bottom: 16px;
     }
 
     .details-card {
@@ -247,7 +318,7 @@
       border: 1px solid var(--line);
       border-radius: 12px;
       padding: 16px;
-      margin: 20px 0;
+      margin: 18px 0;
       text-align: left;
     }
 
@@ -281,8 +352,8 @@
 
     .btn {
       width: 100%;
-      background: var(--brand);
-      color: #05221d;
+      background: var(--ok);
+      color: #072414;
       font-family: var(--font);
       font-size: 15px;
       font-weight: 600;
@@ -295,11 +366,30 @@
       justify-content: center;
       gap: 8px;
       transition: all 0.2s;
-      margin-top: 6px;
     }
 
     .btn:hover {
-      background: var(--brandhover);
+      filter: brightness(1.1);
+    }
+
+    .btn-secondary {
+      width: 100%;
+      background: transparent;
+      color: var(--mute);
+      font-family: var(--font);
+      font-size: 13px;
+      font-weight: 500;
+      padding: 10px;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      cursor: pointer;
+      margin-top: 10px;
+      transition: all 0.2s;
+    }
+
+    .btn-secondary:hover {
+      color: var(--ink);
+      border-color: var(--mute);
     }
   </style>
 </head>
@@ -308,81 +398,22 @@
   <!-- STEP 1: Bank Selection List -->
   <div class="container" id="bankListContainer">
     <div class="header-box">
-      <span class="badge">Open Banking Sandbox</span>
-      <div class="user-pill" id="userPill">
-        <span>👤</span>
-        <span id="userPillText">Loading user...</span>
+      <div class="pill-row">
+        <span class="badge-sandbox">Open Banking Sandbox</span>
+        <div class="user-pill" id="userPill">
+          <span>👤</span>
+          <span id="userPillText">Loading...</span>
+        </div>
       </div>
       <h1>Select Your Bank</h1>
-      <p>Tap your bank to connect instantly with FinanceHub.</p>
+      <p class="subtitle">Tap your bank to connect instantly with FinanceHub.</p>
     </div>
 
-    <div class="bank-list">
-      <!-- GTBank -->
-      <div class="bank-card" onclick="selectAndLinkBank('Guaranty Trust Bank (GTBank)', '0123456789', 450000.0, '058')">
-        <div class="bank-icon">🏦</div>
-        <div class="bank-info">
-          <div class="bank-name">GTBank</div>
-          <div class="bank-desc">Guaranty Trust Bank · Sandbox</div>
-          <div class="bank-balance-hint">Balance: ₦ 450,000.00</div>
-        </div>
-        <div class="bank-action-btn">⚡ Connect</div>
-      </div>
-
-      <!-- Access Bank -->
-      <div class="bank-card" onclick="selectAndLinkBank('Access Bank', '9876543210', 125000.0, '044')">
-        <div class="bank-icon">🏦</div>
-        <div class="bank-info">
-          <div class="bank-name">Access Bank</div>
-          <div class="bank-desc">Access Bank PLC · Real-time</div>
-          <div class="bank-balance-hint">Balance: ₦ 125,000.00</div>
-        </div>
-        <div class="bank-action-btn">⚡ Connect</div>
-      </div>
-
-      <!-- First Bank of Nigeria -->
-      <div class="bank-card" onclick="selectAndLinkBank('First Bank of Nigeria (FBN)', '5544332211', 320000.0, '011')">
-        <div class="bank-icon">🏦</div>
-        <div class="bank-info">
-          <div class="bank-name">FirstBank</div>
-          <div class="bank-desc">First Bank of Nigeria</div>
-          <div class="bank-balance-hint">Balance: ₦ 320,000.00</div>
-        </div>
-        <div class="bank-action-btn">⚡ Connect</div>
-      </div>
-
-      <!-- Zenith Bank -->
-      <div class="bank-card" onclick="selectAndLinkBank('Zenith Bank', '3322114455', 780000.0, '057')">
-        <div class="bank-icon">🏦</div>
-        <div class="bank-info">
-          <div class="bank-name">Zenith Bank</div>
-          <div class="bank-desc">Zenith Bank PLC</div>
-          <div class="bank-balance-hint">Balance: ₦ 780,000.00</div>
-        </div>
-        <div class="bank-action-btn">⚡ Connect</div>
-      </div>
-
-      <!-- UBA -->
-      <div class="bank-card" onclick="selectAndLinkBank('United Bank for Africa (UBA)', '6677889900', 210000.0, '033')">
-        <div class="bank-icon">🏦</div>
-        <div class="bank-info">
-          <div class="bank-name">UBA</div>
-          <div class="bank-desc">United Bank for Africa</div>
-          <div class="bank-balance-hint">Balance: ₦ 210,000.00</div>
-        </div>
-        <div class="bank-action-btn">⚡ Connect</div>
-      </div>
-
-      <!-- Stanbic IBTC -->
-      <div class="bank-card" onclick="selectAndLinkBank('Stanbic IBTC Bank', '8899001122', 95000.0, '221')">
-        <div class="bank-icon">🏦</div>
-        <div class="bank-info">
-          <div class="bank-name">Stanbic IBTC</div>
-          <div class="bank-desc">Stanbic IBTC Bank</div>
-          <div class="bank-balance-hint">Balance: ₦ 95,000.00</div>
-        </div>
-        <div class="bank-action-btn">⚡ Connect</div>
-      </div>
+    <!-- Dynamically Populated Bank List -->
+    <div class="bank-list" id="bankList">
+      <div class="skeleton-box"></div>
+      <div class="skeleton-box"></div>
+      <div class="skeleton-box"></div>
     </div>
   </div>
 
@@ -398,7 +429,7 @@
     <div class="success-box">
       <div class="success-icon-wrap">✓</div>
       <h1 style="color: var(--ok); font-size: 22px; margin-bottom: 6px;">Bank Linked Successfully!</h1>
-      <p style="font-size: 14px; color: var(--mute);">Your financial institution has been authorized and linked to your dashboard.</p>
+      <p style="font-size: 14px; color: var(--mute); line-height: 1.4;">Your bank account has been connected and demo funds have been credited to your total balance.</p>
 
       <div class="details-card">
         <div class="details-row">
@@ -414,79 +445,262 @@
           <span class="details-val" style="color: var(--ok);">● Verified & Active</span>
         </div>
         <div class="details-row">
-          <span class="details-label">Current Balance</span>
-          <span class="details-val balance-val" id="dispBalance">₦ 450,000.00</span>
+          <span class="details-label">Demo Balance Added</span>
+          <span class="details-val balance-val" id="dispBalance">₦ 0.00</span>
         </div>
       </div>
 
-      <button class="btn" id="goToDashboardBtn" style="background: var(--ok); color: #072414;">
+      <button class="btn" id="goToDashboardBtn">
         <span>Continue to Dashboard ➔</span>
+      </button>
+
+      <button class="btn-secondary" id="linkAnotherBtn">
+        + Link Another Bank
       </button>
     </div>
   </div>
 
   <script>
-    // 1. Resolve User ID from URL query params or fallback to latest registered user
+    // -------------------------------------------------------------------------
+    // 1. Bank Configurations & Realistic Demo Balances
+    // -------------------------------------------------------------------------
+    const BANKS_CONFIG = [
+      {
+        id: "gtb",
+        name: "Guaranty Trust Bank (GTBank)",
+        displayName: "GTBank",
+        desc: "Guaranty Trust Bank · Sandbox",
+        accNumber: "0123456789",
+        code: "058",
+        demoBalance: 450000.0,
+        matchKeywords: ["gtbank", "gtb", "guaranty"]
+      },
+      {
+        id: "access",
+        name: "Access Bank",
+        displayName: "Access Bank",
+        desc: "Access Bank PLC · Real-time",
+        accNumber: "9876543210",
+        code: "044",
+        demoBalance: 125000.0,
+        matchKeywords: ["access"]
+      },
+      {
+        id: "fbn",
+        name: "First Bank of Nigeria (FBN)",
+        displayName: "FirstBank",
+        desc: "First Bank of Nigeria",
+        accNumber: "5544332211",
+        code: "011",
+        demoBalance: 320000.0,
+        matchKeywords: ["first", "fbn", "firstbank"]
+      },
+      {
+        id: "zenith",
+        name: "Zenith Bank",
+        displayName: "Zenith Bank",
+        desc: "Zenith Bank PLC",
+        accNumber: "3322114455",
+        code: "057",
+        demoBalance: 780000.0,
+        matchKeywords: ["zenith"]
+      },
+      {
+        id: "uba",
+        name: "United Bank for Africa (UBA)",
+        displayName: "UBA",
+        desc: "United Bank for Africa",
+        accNumber: "6677889900",
+        code: "033",
+        demoBalance: 210000.0,
+        matchKeywords: ["uba", "united"]
+      },
+      {
+        id: "stanbic",
+        name: "Stanbic IBTC Bank",
+        displayName: "Stanbic IBTC",
+        desc: "Stanbic IBTC Bank",
+        accNumber: "8899001122",
+        code: "221",
+        demoBalance: 95000.0,
+        matchKeywords: ["stanbic", "ibtc"]
+      }
+    ];
+
+    // Bank Building SVG Icon (matches mobile screenshot)
+    const BANK_SVG = `
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M3 21h18M3 10h18M5 10v11M19 10v11M9 10v11M15 10v11M12 2L2 7h20L12 2z"/>
+        <text x="12" y="6.6" font-size="4.5" font-family="sans-serif" font-weight="bold" fill="currentColor" text-anchor="middle" stroke="none">$</text>
+      </svg>
+    `;
+
+    // -------------------------------------------------------------------------
+    // 2. State & User Resolution
+    // -------------------------------------------------------------------------
     const urlParams = new URLSearchParams(window.location.search);
     let userId = urlParams.get("user_id") || urlParams.get("userId");
     let userName = "";
+    let linkedAccounts = [];
+    let isSubmitting = false;
+    let redirectDeepLink = "";
 
-    async function initUser() {
+    function formatNaira(amount) {
+      return "₦ " + Number(amount || 0).toLocaleString("en-NG", {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+      });
+    }
+
+    function matchAccountToBank(account, bankConfig) {
+      if (!account || !account.bank_name) return false;
+      const accName = account.bank_name.toLowerCase().replace(/[^a-z0-9]/g, "");
+      for (const kw of bankConfig.matchKeywords) {
+        const cleanKw = kw.toLowerCase().replace(/[^a-z0-9]/g, "");
+        if (accName.includes(cleanKw) || cleanKw.includes(accName)) {
+          return true;
+        }
+      }
+      return false;
+    }
+
+    // -------------------------------------------------------------------------
+    // 3. Render Bank Cards
+    // If Connected: Shows '✓ Connected' in front + balance below bank name
+    // If NOT Connected: Does NOT show amount, shows '⚡ Connect' button
+    // -------------------------------------------------------------------------
+    function renderBankCards() {
+      const container = document.getElementById("bankList");
+      container.innerHTML = "";
+
+      BANKS_CONFIG.forEach(bank => {
+        const linkedAcc = linkedAccounts.find(acc => matchAccountToBank(acc, bank));
+        const isConnected = !!linkedAcc;
+
+        const card = document.createElement("div");
+        card.id = "card_" + bank.id;
+        card.className = "bank-card" + (isConnected ? " connected" : "");
+
+        // Balance element: ONLY shown if connected
+        let balanceHtml = "";
+        if (isConnected) {
+          const bal = (linkedAcc && linkedAcc.balance !== undefined) ? linkedAcc.balance : bank.demoBalance;
+          balanceHtml = `<div class="bank-balance-hint">Balance: ${formatNaira(bal)}</div>`;
+        }
+
+        // Action button: '✓ Connected' vs '⚡ Connect'
+        const btnHtml = isConnected
+          ? `<div class="bank-action-btn connected-badge">✓ Connected</div>`
+          : `<div class="bank-action-btn connect-btn"><span class="bolt-icon">⚡</span> Connect</div>`;
+
+        card.innerHTML = `
+          <div class="bank-icon">${BANK_SVG}</div>
+          <div class="bank-info">
+            <div class="bank-name">${bank.displayName}</div>
+            <div class="bank-desc">${bank.desc}</div>
+            ${balanceHtml}
+          </div>
+          ${btnHtml}
+        `;
+
+        if (!isConnected) {
+          card.onclick = () => handleBankClick(bank);
+        } else {
+          card.onclick = (e) => {
+            e.preventDefault();
+          };
+        }
+
+        container.appendChild(card);
+      });
+    }
+
+    // -------------------------------------------------------------------------
+    // 4. Initial Fetch & Check Existing Accounts
+    // -------------------------------------------------------------------------
+    async function init() {
+      // 1. Resolve User ID
       if (!userId) {
         try {
           const res = await fetch("/api/mono/latest-user");
           if (res.ok) {
             const data = await res.json();
             userId = String(data.user_id);
-            userName = data.full_name || data.email;
+            userName = data.full_name || data.email || "";
           }
         } catch (e) {
-          console.warn("Could not fetch latest user, defaulting to 20:", e);
-          userId = "20";
+          console.warn("Could not fetch latest user:", e);
         }
       }
-      
-      const userText = userName ? `${userName} (ID #${userId})` : `User ID: #${userId}`;
-      document.getElementById("userPillText").innerText = userText;
-    }
 
-    initUser();
-
-    let redirectDeepLink = "";
-    let isSubmitting = false;
-
-    // Direct 1-Tap Bank Selection & Linking
-    async function selectAndLinkBank(bankName, accNumber, balance, bankCode) {
-      if (isSubmitting) return;
-      isSubmitting = true;
-
-      // Make sure we have a userId
-      if (!userId) {
-        await initUser();
+      // 2. Fetch User's Existing Accounts
+      if (userId) {
+        try {
+          const res = await fetch(`/api/mono/users/${encodeURIComponent(userId)}/accounts`);
+          if (res.ok) {
+            const data = await res.json();
+            linkedAccounts = data.accounts || [];
+            if (!userName && data.user_name) {
+              userName = data.user_name;
+            }
+          }
+        } catch (err) {
+          console.warn("Could not load user accounts:", err);
+        }
       }
 
+      // Update User Pill UI
+      const userText = userId ? `User ID: #${userId}` : "Sandbox Mode";
+      document.getElementById("userPillText").innerText = userText;
+      if (userName) {
+        document.getElementById("userPill").title = userName;
+      }
+
+      // Render cards with already-connected state
+      renderBankCards();
+    }
+
+    // -------------------------------------------------------------------------
+    // 5. Connect Bank Action: Links Account & Credits Demo Amount
+    // -------------------------------------------------------------------------
+    async function handleBankClick(bank) {
+      if (isSubmitting) return;
+
+      // Check if already linked
+      const existing = linkedAccounts.find(acc => matchAccountToBank(acc, bank));
+      if (existing) {
+        return;
+      }
+
+      isSubmitting = true;
+
+      // Show loader overlay
       const loader = document.getElementById("loadingOverlay");
       loader.style.display = "flex";
-      document.getElementById("loadingTitle").innerText = "Connecting to " + bankName + "...";
-      document.getElementById("loadingSub").innerText = `Linking account to User #${userId} and saving to PostgreSQL...`;
+      document.getElementById("loadingTitle").innerText = "Connecting to " + bank.displayName + "...";
+      document.getElementById("loadingSub").innerText = `Adding demo balance of ${formatNaira(bank.demoBalance)} to User #${userId || '40'}...`;
 
       try {
         const payload = {
-          bank_name: bankName,
-          account_number: accNumber,
-          balance: balance,
+          bank_name: bank.name,
+          account_number: bank.accNumber,
+          balance: bank.demoBalance,
           currency: "NGN",
           account_type: "savings"
         };
+        if (userName) {
+          payload.account_name = userName;
+        }
 
-        const res = await fetch(`/api/mono/users/${encodeURIComponent(userId)}/link-account`, {
+        const effectiveId = userId || "40";
+        const res = await fetch(`/api/mono/users/${encodeURIComponent(effectiveId)}/link-account`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(payload)
         });
 
         if (!res.ok) {
-          let errorMsg = "You are already linked this bank.";
+          let errorMsg = "Could not link bank.";
           try {
             const errJson = await res.json();
             errorMsg = errJson.detail || errJson.message || errorMsg;
@@ -497,46 +711,65 @@
         }
 
         const data = await res.json();
-        console.log("Bank linked successfully:", data);
 
-        // Hide loader & bank list, show Success Card
+        // Add newly linked bank to linkedAccounts list
+        linkedAccounts.push({
+          bank_name: bank.name,
+          balance: bank.demoBalance,
+          currency: "NGN",
+          account_number: bank.accNumber
+        });
+
+        // Immediately update bank list UI: now shows balance & '✓ Connected'
+        renderBankCards();
+
+        // Update Success Screen details
         loader.style.display = "none";
         document.getElementById("bankListContainer").style.display = "none";
         document.getElementById("successContainer").style.display = "flex";
 
-        // Update Success Card details
-        document.getElementById("dispBankName").innerText = bankName;
-        document.getElementById("dispAccNum").innerText = accNumber;
-        document.getElementById("dispBalance").innerText = "₦ " + balance.toLocaleString("en-NG", { minimumFractionDigits: 2 });
+        document.getElementById("dispBankName").innerText = bank.displayName;
+        const last4 = bank.accNumber.slice(-4);
+        document.getElementById("dispAccNum").innerText = `••••${last4}`;
+        document.getElementById("dispBalance").innerText = formatNaira(bank.demoBalance);
 
-        // Deep Link URL for Android
-        const accountId = (data.account && data.account.mono_account_id) || "sandbox_acc_01";
-        redirectDeepLink = `financehub://bank-success?user_id=${encodeURIComponent(userId)}&account_id=${encodeURIComponent(accountId)}&bank_name=${encodeURIComponent(bankName)}`;
+        // Prepare Deep Link for Android App
+        const accountId = (data.account && data.account.mono_account_id) || `mono_acc_${bank.id}`;
+        redirectDeepLink = `financehub://bank-success?user_id=${encodeURIComponent(effectiveId)}&account_id=${encodeURIComponent(accountId)}&bank_name=${encodeURIComponent(bank.displayName)}&balance=${encodeURIComponent(bank.demoBalance)}`;
 
-        // Button click
+        // Button clicks
         document.getElementById("goToDashboardBtn").onclick = () => {
-          navigateDashboard(bankName);
+          navigateDashboard(bank.displayName);
+        };
+
+        document.getElementById("linkAnotherBtn").onclick = () => {
+          document.getElementById("successContainer").style.display = "none";
+          document.getElementById("bankListContainer").style.display = "flex";
         };
 
         // Notify Android bridge immediately
         if (window.AndroidBridge && typeof window.AndroidBridge.onBankLinkSuccess === "function") {
-          window.AndroidBridge.onBankLinkSuccess(userId, bankName);
+          window.AndroidBridge.onBankLinkSuccess(effectiveId, bank.displayName);
         }
 
       } catch (err) {
         console.error("Link error:", err);
         loader.style.display = "none";
+        alert(err.message || "Failed to link bank.");
+      } finally {
         isSubmitting = false;
-        alert(err.message);
       }
     }
 
     function navigateDashboard(bankName) {
       if (window.AndroidBridge && typeof window.AndroidBridge.onBankLinkSuccess === "function") {
-        window.AndroidBridge.onBankLinkSuccess(userId, bankName || "Connected Bank");
+        window.AndroidBridge.onBankLinkSuccess(userId || "40", bankName || "Connected Bank");
       }
       window.location.href = redirectDeepLink;
     }
+
+    // Start initialization on page load
+    init();
   </script>
 </body>
 </html>
