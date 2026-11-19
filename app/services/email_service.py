@@ -1,5 +1,5 @@
 """
-Email delivery service for FinanceHub authentication.
+Email delivery service for MoneyHub authentication.
 Sends transactional OTP emails for Registration and Login flows via SMTP.
 """
 
@@ -11,17 +11,17 @@ from typing import Optional
 
 from app.core.config import settings
 
-logger = logging.getLogger("financehub.email")
+logger = logging.getLogger("moneyhub.email")
 
 
 def build_otp_html(otp_code: str, user_name: str, flow_type: str) -> str:
-    """Generate modern, responsive HTML email template for FinanceHub OTP."""
+    """Generate modern, responsive HTML email template for MoneyHub OTP."""
     return f"""<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Your FinanceHub Verification Code</title>
+  <title>Your MoneyHub Verification Code</title>
   <style>
     body {{
       margin: 0;
@@ -125,24 +125,24 @@ def build_otp_html(otp_code: str, user_name: str, flow_type: str) -> str:
   <div class="wrapper">
     <div class="main">
       <div class="header">
-        <h1 class="brand-title">FinanceHub</h1>
+        <h1 class="brand-title">MoneyHub</h1>
         <div class="brand-sub">Open Banking Platform</div>
       </div>
       <div class="content">
         <div class="greeting">Hello {user_name},</div>
         <p class="message">
-          You recently initiated a <strong>{flow_type}</strong> request on your FinanceHub account. Use the verification code below to proceed:
+          You recently initiated a <strong>{flow_type}</strong> request on your MoneyHub account. Use the verification code below to proceed:
         </p>
         <div class="otp-container">
           <div class="otp-code">{otp_code}</div>
           <div class="otp-expiry">Valid for 10 minutes &bull; One-time use only</div>
         </div>
         <div class="security-notice">
-          <strong>Security Note:</strong> Never share this OTP with anyone, including FinanceHub staff. We will never ask for your verification code over the phone or email.
+          <strong>Security Note:</strong> Never share this OTP with anyone, including MoneyHub staff. We will never ask for your verification code over the phone or email.
         </div>
       </div>
       <div class="footer">
-        &copy; 2026 FinanceHub Technologies. All rights reserved.<br>
+        &copy; 2026 MoneyHub Technologies. All rights reserved.<br>
         If you did not request this verification, please secure your account immediately.
       </div>
     </div>
@@ -181,16 +181,16 @@ def send_otp_email(
 
     try:
         msg = MIMEMultipart("alternative")
-        msg["Subject"] = f"{otp_code} is your FinanceHub {flow_type} Code"
+        msg["Subject"] = f"{otp_code} is your MoneyHub {flow_type} Code"
         msg["From"] = f"{settings.EMAILS_FROM_NAME} <{sender_user}>"
         msg["To"] = to_email
 
         # Plain-text alternative
         text_content = (
             f"Hello {display_name},\n\n"
-            f"Your FinanceHub {flow_type} verification code is: {otp_code}\n\n"
+            f"Your MoneyHub {flow_type} verification code is: {otp_code}\n\n"
             f"This code is valid for 10 minutes. Please do not share this code with anyone.\n\n"
-            f"— FinanceHub Security Team"
+            f"— MoneyHub Security Team"
         )
         msg.attach(MIMEText(text_content, "plain", "utf-8"))
 

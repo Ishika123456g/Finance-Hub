@@ -273,7 +273,7 @@ def verify_otp(payload: OTPVerifyRequest, db: Session = Depends(get_db)):
     )
 
     return OTPVerifyResponse(
-        message="OTP verified successfully. Welcome to FinanceHub!",
+        message="OTP verified successfully. Welcome to MoneyHub!",
         access_token=access_token,
         token_type="bearer",
         expires_in_hours=24,

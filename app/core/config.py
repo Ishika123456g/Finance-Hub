@@ -45,7 +45,7 @@ class Settings(BaseSettings):
     EMAIL_HOST_USER: Optional[str] = "yrstogi@gmail.com"
     EMAIL_HOST_PASSWORD: Optional[str] = None
     EMAIL_USE_TLS: bool = True
-    EMAILS_FROM_NAME: str = "FinanceHub Security"
+    EMAILS_FROM_NAME: str = "MoneyHub"
 
     # Session Configuration
     SESSION_EXPIRE_AT_BROWSER_CLOSE: bool = True
